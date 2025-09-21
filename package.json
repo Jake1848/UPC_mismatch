@@ -1,0 +1,52 @@
+{
+  "name": "upc-conflict-resolver",
+  "version": "1.0.0",
+  "description": "Enterprise UPC Conflict Resolver - $599/month SaaS for warehouses",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "build": "npm run client:build && npm run server:build",
+    "start": "npm run server:start",
+    "client:dev": "cd client && npm run dev",
+    "client:build": "cd client && npm run build",
+    "server:dev": "cd server && npm run dev",
+    "server:build": "cd server && npm run build",
+    "server:start": "cd server && npm start",
+    "db:generate": "cd server && npx prisma generate",
+    "db:push": "cd server && npx prisma db push",
+    "db:migrate": "cd server && npx prisma migrate dev",
+    "db:seed": "cd server && npm run seed",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "typecheck": "npm run typecheck --workspaces",
+    "clean": "rm -rf node_modules client/node_modules server/node_modules",
+    "setup": "npm install && npm run db:generate && npm run db:push && npm run db:seed"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/company/upc-conflict-resolver"
+  },
+  "keywords": [
+    "upc",
+    "warehouse",
+    "inventory",
+    "conflict-resolution",
+    "saas",
+    "enterprise"
+  ],
+  "author": "UPC Conflict Resolver Team",
+  "license": "PROPRIETARY"
+}

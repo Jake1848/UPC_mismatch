@@ -1,0 +1,401 @@
+// UPC Conflict Resolver Database Schema
+// Multi-tenant enterprise SaaS architecture
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Organizations (Multi-tenant)
+model Organization {
+  id                String   @id @default(cuid())
+  name              String
+  slug              String   @unique
+  subscriptionStatus SubscriptionStatus @default(TRIAL)
+  plan              Plan     @default(STARTER)
+  billingEmail      String?
+  maxUsers          Int      @default(3)
+  maxProducts       Int      @default(100000)
+  settings          Json     @default("{}")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Stripe billing
+  stripeCustomerId     String?   @unique
+  stripeSubscriptionId String?   @unique
+  stripePriceId        String?
+  trialEndsAt          DateTime?
+  billingCycleAnchor   DateTime?
+
+  // Relations
+  users        User[]
+  analyses     Analysis[]
+  conflicts    Conflict[]
+  auditLogs    AuditLog[]
+  integrations Integration[]
+  webhooks     Webhook[]
+
+  @@map("organizations")
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+}
+
+enum Plan {
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+// Users and Authentication
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  password     String?  // For local auth
+  role         Role     @default(VIEWER)
+  isActive     Boolean  @default(true)
+  lastLoginAt  DateTime?
+  avatarUrl    String?
+  settings     Json     @default("{}")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Multi-tenant
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // OAuth accounts
+  accounts Account[]
+  sessions Session[]
+
+  // Relations
+  uploadedAnalyses Analysis[] @relation("UploadedBy")
+  assignedConflicts Conflict[] @relation("AssignedTo")
+  resolvedConflicts Conflict[] @relation("ResolvedBy")
+  auditLogs        AuditLog[]
+
+  @@map("users")
+}
+
+enum Role {
+  ADMIN
+  ANALYST
+  VIEWER
+}
+
+// NextAuth Account model
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+// NextAuth Session model
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+// File Analysis
+model Analysis {
+  id            String        @id @default(cuid())
+  fileName      String
+  originalName  String
+  fileUrl       String
+  fileSize      Int
+  fileMimeType  String
+
+  // Processing status
+  status        AnalysisStatus @default(PENDING)
+  progress      Int           @default(0)
+  errorMessage  String?
+
+  // Data stats
+  totalRecords     Int @default(0)
+  uniqueUPCs       Int @default(0)
+  uniqueProducts   Int @default(0)
+  duplicateUPCs    Int @default(0)
+  multiUPCProducts Int @default(0)
+  maxDuplication   Int @default(0)
+
+  // Column mapping (detected or manual)
+  columnMapping Json // { upc: "column_name", sku: "column_name", warehouse: "column_name", location: "column_name" }
+
+  // Settings
+  settings      Json @default("{}")
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Multi-tenant
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  uploadedById String
+  uploadedBy   User @relation("UploadedBy", fields: [uploadedById], references: [id])
+
+  // Relations
+  conflicts Conflict[]
+  records   AnalysisRecord[]
+
+  @@map("analyses")
+}
+
+enum AnalysisStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+// Raw data records from uploaded files
+model AnalysisRecord {
+  id         String @id @default(cuid())
+  productId  String
+  warehouseId String?
+  upc        String
+  location   String?
+  rawData    Json   // Store original row data
+
+  analysisId String
+  analysis   Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+
+  @@index([analysisId, upc])
+  @@index([analysisId, productId])
+  @@map("analysis_records")
+}
+
+// Conflicts and Resolution
+model Conflict {
+  id           String        @id @default(cuid())
+  type         ConflictType
+  upc          String?       // For duplicate UPC conflicts
+  productId    String?       // For multi-UPC product conflicts
+  productIds   String[]      // Array of affected product IDs
+  upcs         String[]      // Array of affected UPCs
+  locations    String[]      // Array of affected locations
+  warehouses   String[]      // Array of affected warehouses
+
+  severity     Severity      @default(LOW)
+  priority     Priority      @default(MEDIUM)
+  status       ConflictStatus @default(NEW)
+
+  costImpact   Decimal?      @db.Decimal(10,2)
+  description  String?
+
+  // Resolution tracking
+  assignedAt    DateTime?
+  resolvedAt    DateTime?
+  resolutionNotes String?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Multi-tenant
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  analysisId String
+  analysis   Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+
+  assignedToId String?
+  assignedTo   User? @relation("AssignedTo", fields: [assignedToId], references: [id])
+
+  resolvedById String?
+  resolvedBy   User? @relation("ResolvedBy", fields: [resolvedById], references: [id])
+
+  @@index([organizationId, status])
+  @@index([organizationId, type])
+  @@index([organizationId, severity])
+  @@index([upc])
+  @@index([productId])
+  @@map("conflicts")
+}
+
+enum ConflictType {
+  DUPLICATE_UPC      // One UPC mapped to multiple products
+  MULTI_UPC_PRODUCT  // One product mapped to multiple UPCs
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum ConflictStatus {
+  NEW
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+  DISMISSED
+}
+
+// Audit Logging
+model AuditLog {
+  id       String @id @default(cuid())
+  action   String
+  resource String
+  resourceId String?
+  details  Json
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  // Multi-tenant
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  userId String?
+  user   User? @relation(fields: [userId], references: [id])
+
+  @@index([organizationId, createdAt])
+  @@index([organizationId, action])
+  @@index([userId])
+  @@map("audit_logs")
+}
+
+// Integrations (WMS, ERP, etc.)
+model Integration {
+  id          String           @id @default(cuid())
+  name        String
+  type        IntegrationType
+  config      Json            // Encrypted configuration
+  isActive    Boolean         @default(true)
+  lastSyncAt  DateTime?
+  nextSyncAt  DateTime?
+  errorCount  Int             @default(0)
+  lastError   String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  // Multi-tenant
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("integrations")
+}
+
+enum IntegrationType {
+  WMS_MANHATTAN
+  WMS_BLUE_YONDER
+  WMS_SAP
+  ERP_NETSUITE
+  ERP_ORACLE
+  ERP_DYNAMICS
+  FTP_FOLDER
+  SFTP_FOLDER
+  API_WEBHOOK
+}
+
+// Webhooks for real-time notifications
+model Webhook {
+  id        String         @id @default(cuid())
+  name      String
+  url       String
+  secret    String?
+  events    WebhookEvent[]
+  isActive  Boolean        @default(true)
+  headers   Json           @default("{}")
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  // Multi-tenant
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("webhooks")
+}
+
+enum WebhookEvent {
+  ANALYSIS_COMPLETED
+  CONFLICT_CREATED
+  CONFLICT_RESOLVED
+  HIGH_SEVERITY_CONFLICT
+  SUBSCRIPTION_UPDATED
+}
+
+// Scheduled monitoring jobs
+model MonitoringJob {
+  id            String    @id @default(cuid())
+  name          String
+  type          JobType
+  schedule      String    // Cron expression
+  config        Json
+  isActive      Boolean   @default(true)
+  lastRunAt     DateTime?
+  nextRunAt     DateTime?
+  consecutiveFailures Int @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Multi-tenant
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("monitoring_jobs")
+}
+
+enum JobType {
+  FILE_SCAN
+  INTEGRATION_SYNC
+  REPORT_GENERATION
+  CLEANUP
+  HEALTH_CHECK
+}
+
+// API Keys for programmatic access
+model ApiKey {
+  id        String   @id @default(cuid())
+  name      String
+  keyHash   String   @unique
+  prefix    String   // First 8 chars for identification
+  permissions String[] // Array of permissions
+  lastUsedAt DateTime?
+  expiresAt  DateTime?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  // Multi-tenant
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("api_keys")
+}
