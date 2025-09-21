@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/router'
 import { FileUpload } from '../../components/upload/FileUpload'
-import { GlassCard } from '../../components/ui/GlassCard'
+import { GlassCard } from '../../components/ui/glass-card'
 import { ThemeToggle } from '../../components/ui/ThemeToggle'
 
 export default function UploadPage() {

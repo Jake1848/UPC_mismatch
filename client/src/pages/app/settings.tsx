@@ -13,7 +13,7 @@ import {
 import { useRouter } from 'next/router'
 import { useAuth } from '../../hooks/useAuth'
 import { billingApi, organizationApi } from '../../services/api'
-import { GlassCard } from '../../components/ui/GlassCard'
+import { GlassCard } from '../../components/ui/glass-card'
 import { ThemeToggle } from '../../components/ui/ThemeToggle'
 import { toast } from 'react-hot-toast'
 

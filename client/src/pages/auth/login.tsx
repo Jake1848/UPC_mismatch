@@ -7,7 +7,7 @@ import {
   ArrowRightIcon
 } from '@heroicons/react/24/outline'
 import { useAuth } from '../../hooks/useAuth'
-import { GlassCard } from '../../components/ui/GlassCard'
+import { GlassCard } from '../../components/ui/glass-card'
 import { ThemeToggle } from '../../components/ui/ThemeToggle'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
