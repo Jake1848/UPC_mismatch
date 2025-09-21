@@ -8,7 +8,7 @@ import { conflictsApi } from "../../services/api"
 import { useWebSocket } from "../../services/websocket"
 import type { Conflict } from "../types/index"
 import { ConflictCard } from "./ConflictCard"
-import { GlassCard } from "../ui/glass-card"
+import { GlassCard } from "../ui/GlassCard"
 import { toast } from "react-hot-toast"
 
 interface ConflictListProps {

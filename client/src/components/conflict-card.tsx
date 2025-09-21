@@ -12,7 +12,7 @@ import {
   CurrencyDollarIcon,
 } from "@heroicons/react/24/outline"
 import type { Conflict } from "../types/index"
-import { GlassCard } from "../ui/glass-card"
+import { GlassCard } from "../ui/GlassCard"
 import { formatDistanceToNow } from "date-fns"
 
 interface ConflictCardProps {
