@@ -8,7 +8,7 @@ import { conflictsApi } from "../../services/api"
 import { useWebSocket } from "../../services/websocket"
 import type { Conflict } from "../types/index"
 import { ConflictCard } from "./ConflictCard"
-import { GlassCard } from "../ui/GlassCard"
+// Inline glass card styling to avoid import issues
 import { toast } from "react-hot-toast"
 
 interface ConflictListProps {
@@ -156,7 +156,7 @@ export const ConflictList: React.FC<ConflictListProps> = ({
     <div className="space-y-6">
       {/* Filters and Controls */}
       {showFilters && (
-        <GlassCard>
+        <div className="relative backdrop-blur-xl bg-white/25 dark:bg-gray-800/25 border border-white/20 dark:border-white/10 rounded-xl shadow-xl overflow-hidden transition-all duration-300 ease-out hover:shadow-2xl hover:-translate-y-1 hover:bg-white/30 dark:hover:bg-gray-800/30">
           <div className="p-6">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
               {/* Search */}
@@ -238,7 +238,7 @@ export const ConflictList: React.FC<ConflictListProps> = ({
               </motion.div>
             )}
           </div>
-        </GlassCard>
+        </div>
       )}
 
       {/* Conflicts List */}
@@ -268,7 +268,7 @@ export const ConflictList: React.FC<ConflictListProps> = ({
         {loading && (
           <div className="space-y-4">
             {[...Array(5)].map((_, i) => (
-              <GlassCard key={i}>
+              <div key={i} className="relative backdrop-blur-xl bg-white/25 dark:bg-gray-800/25 border border-white/20 dark:border-white/10 rounded-xl shadow-xl overflow-hidden">
                 <div className="p-6 animate-pulse">
                   <div className="flex items-start space-x-4">
                     <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded" />
@@ -279,14 +279,14 @@ export const ConflictList: React.FC<ConflictListProps> = ({
                     <div className="w-16 h-6 bg-gray-200 dark:bg-gray-700 rounded" />
                   </div>
                 </div>
-              </GlassCard>
+              </div>
             ))}
           </div>
         )}
 
         {/* Empty State */}
         {!loading && conflicts.length === 0 && (
-          <GlassCard>
+          <div className="relative backdrop-blur-xl bg-white/25 dark:bg-gray-800/25 border border-white/20 dark:border-white/10 rounded-xl shadow-xl overflow-hidden transition-all duration-300 ease-out hover:shadow-2xl hover:-translate-y-1 hover:bg-white/30 dark:hover:bg-gray-800/30">
             <div className="p-12 text-center">
               <CheckIcon className="w-16 h-16 text-green-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No conflicts found</h3>
@@ -296,7 +296,7 @@ export const ConflictList: React.FC<ConflictListProps> = ({
                   : "Great! No conflicts detected in your data."}
               </p>
             </div>
-          </GlassCard>
+          </div>
         )}
 
         {/* Conflicts */}
