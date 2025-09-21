@@ -5,9 +5,9 @@ const nextConfig = {
 
   // Environment variables
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
-    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || '',
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '',
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || '',
   },
 
   // Image optimization
@@ -68,11 +68,7 @@ const nextConfig = {
     return []
   },
 
-  // Experimental features
-  experimental: {
-    // Enable app directory
-    appDir: false, // Using pages directory for now
-  },
+  // Remove experimental.appDir as it's deprecated
 }
 
 module.exports = nextConfig

@@ -1,6 +1,6 @@
 import { io, Socket } from 'socket.io-client'
 import { toast } from 'react-hot-toast'
-import { NotificationMessage } from '../types'
+import { NotificationMessage } from '../types/index'
 
 class WebSocketService {
   private socket: Socket | null = null

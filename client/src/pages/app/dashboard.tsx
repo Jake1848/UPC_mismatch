@@ -14,7 +14,7 @@ import {
 import { useAuth } from '../../hooks/useAuth'
 import { useWebSocket } from '../../services/websocket'
 import { analysisApi, conflictsApi } from '../../services/api'
-import { Analysis, Conflict } from '../../types'
+import { Analysis, Conflict } from '../../types/index'
 import { GlassCard } from '../../components/ui/GlassCard'
 import { ThemeToggle } from '../../components/ui/ThemeToggle'
 import { formatDistanceToNow } from 'date-fns'

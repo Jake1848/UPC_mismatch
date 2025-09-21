@@ -10,7 +10,7 @@ import {
   UserIcon,
   CurrencyDollarIcon
 } from '@heroicons/react/24/outline'
-import { Conflict } from '../../types'
+import { Conflict } from '../../types/index'
 import { GlassCard } from '../ui/GlassCard'
 import { formatDistanceToNow } from 'date-fns'
 

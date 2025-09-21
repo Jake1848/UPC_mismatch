@@ -9,7 +9,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { conflictsApi } from '../../services/api'
 import { useWebSocket } from '../../services/websocket'
-import { Conflict, User } from '../../types'
+import { Conflict, User } from '../../types/index'
 import { ConflictCard } from './ConflictCard'
 import { GlassCard } from '../ui/GlassCard'
 import { toast } from 'react-hot-toast'
