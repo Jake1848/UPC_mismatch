@@ -1,0 +1,67 @@
+name: upc-resolver
+services:
+- name: api
+  source_dir: /
+  dockerfile_path: Dockerfile
+  github:
+    repo: Jake1848/UPC_mismatch
+    branch: master
+    deploy_on_push: true
+
+  instance_count: 1
+  instance_size_slug: basic-xxs
+
+  http_port: 5000
+
+  health_check:
+    http_path: /health
+    initial_delay_seconds: 60
+    period_seconds: 30
+    timeout_seconds: 10
+    failure_threshold: 3
+    success_threshold: 1
+
+  routes:
+  - path: /
+
+  envs:
+  - key: NODE_ENV
+    value: production
+  - key: PORT
+    value: "5000"
+  - key: DATABASE_URL
+    value: ${db.DATABASE_URL}
+  - key: REDIS_URL
+    value: ${redis.DATABASE_URL}
+  - key: JWT_SECRET
+    value: your-jwt-secret-will-be-set-in-dashboard
+    type: SECRET
+  - key: STRIPE_SECRET_KEY
+    value: your-stripe-key-will-be-set-in-dashboard
+    type: SECRET
+  - key: AWS_ACCESS_KEY_ID
+    value: your-aws-key-will-be-set-in-dashboard
+    type: SECRET
+  - key: AWS_SECRET_ACCESS_KEY
+    value: your-aws-secret-will-be-set-in-dashboard
+    type: SECRET
+  - key: AWS_REGION
+    value: us-east-1
+  - key: S3_BUCKET_NAME
+    value: upc-resolver-uploads
+  - key: FRONTEND_URL
+    value: ${APP_URL}
+  - key: BACKEND_URL
+    value: ${APP_URL}
+
+databases:
+- name: db
+  engine: PG
+  version: "14"
+  size: basic-xs
+  num_nodes: 1
+
+- name: redis
+  engine: REDIS
+  version: "7"
+  size: basic-xs
