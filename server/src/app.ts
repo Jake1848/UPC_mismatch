@@ -2,15 +2,19 @@ import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import rateLimit from 'express-rate-limit'
-import { PrismaClient } from '@prisma/client'
 import { createServer } from 'http'
 import { Server as SocketIOServer } from 'socket.io'
+
+// Import utilities
+import { envValidator, envConfig } from './utils/envValidator'
+import { db } from './utils/database'
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler'
 import { requestLogger } from './middleware/requestLogger'
 import { authMiddleware } from './middleware/auth'
 import { organizationMiddleware } from './middleware/organization'
+import { securityHeaders } from './middleware/securityHeaders'
 
 // Import routes
 import authRoutes from './routes/auth'
@@ -29,6 +33,9 @@ import { setupWebSocket } from './services/websocket'
 import { logger } from './utils/logger'
 import { setupBullDashboard } from './services/queue'
 
+// Validate environment variables before starting
+envValidator.validateRequired(envConfig)
+
 const app = express()
 const server = createServer(app)
 const io = new SocketIOServer(server, {
@@ -38,12 +45,13 @@ const io = new SocketIOServer(server, {
   }
 })
 
-// Initialize Prisma
-export const prisma = new PrismaClient({
-  log: process.env.NODE_ENV === 'development' ? ['query', 'info', 'warn', 'error'] : ['error'],
-})
+// Initialize Prisma with connection retry
+export const prisma = db.getClient()
 
-// Middleware setup
+// Security headers
+app.use(securityHeaders)
+
+// Helmet for additional security
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -51,17 +59,37 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'"],
       scriptSrc: ["'self'"],
       imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", process.env.FRONTEND_URL!],
     },
   },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  }
 }))
 
+// CORS configuration with validation
+const allowedOrigins = process.env.NODE_ENV === 'production'
+  ? [process.env.FRONTEND_URL!].filter(Boolean)
+  : ["http://localhost:3000", "http://localhost:3001"];
+
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? [process.env.FRONTEND_URL!]
-    : ["http://localhost:3000", "http://localhost:3001"],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      logger.warn(`Blocked CORS request from origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Organization-Id'],
+  maxAge: 86400 // 24 hours
 }))
 
 // Rate limiting
@@ -78,8 +106,9 @@ const limiter = rateLimit({
 
 app.use('/api/', limiter)
 
+// Request size limits
 app.use(express.json({
-  limit: '50mb',
+  limit: '10mb', // Reduced from 50mb for security
   verify: (req, res, buf) => {
     // Store raw body for webhook verification
     if (req.url?.includes('/webhooks/stripe')) {
@@ -87,7 +116,7 @@ app.use(express.json({
     }
   }
 }))
-app.use(express.urlencoded({ extended: true, limit: '50mb' }))
+app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
 // Request logging
 app.use(requestLogger)
@@ -100,25 +129,36 @@ if (process.env.NODE_ENV === 'development') {
   setupBullDashboard(app)
 }
 
+// API versioning
+const API_VERSION = '/api/v1';
+
 // Health check (no auth required)
 app.use('/health', healthRoutes)
 
 // Webhook routes (no auth required, has own verification)
-app.use('/api/webhooks', webhookRoutes)
+app.use(`${API_VERSION}/webhooks`, webhookRoutes)
 
-// Auth routes (no auth required)
-app.use('/api/auth', authRoutes)
+// Auth routes with specific rate limiting
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // limit each IP to 5 requests per windowMs
+  message: 'Too many authentication attempts, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true // Don't count successful requests
+});
+app.use(`${API_VERSION}/auth`, authLimiter, authRoutes)
 
 // Protected routes (require authentication)
-app.use('/api/organizations', authMiddleware, organizationMiddleware, organizationRoutes)
-app.use('/api/analyses', authMiddleware, organizationMiddleware, analysisRoutes)
-app.use('/api/conflicts', authMiddleware, organizationMiddleware, conflictRoutes)
-app.use('/api/billing', authMiddleware, organizationMiddleware, billingRoutes)
-app.use('/api/integrations', authMiddleware, organizationMiddleware, integrationRoutes)
-app.use('/api/reports', authMiddleware, organizationMiddleware, reportRoutes)
+app.use(`${API_VERSION}/organizations`, authMiddleware, organizationMiddleware, organizationRoutes)
+app.use(`${API_VERSION}/analyses`, authMiddleware, organizationMiddleware, analysisRoutes)
+app.use(`${API_VERSION}/conflicts`, authMiddleware, organizationMiddleware, conflictRoutes)
+app.use(`${API_VERSION}/billing`, authMiddleware, organizationMiddleware, billingRoutes)
+app.use(`${API_VERSION}/integrations`, authMiddleware, organizationMiddleware, integrationRoutes)
+app.use(`${API_VERSION}/reports`, authMiddleware, organizationMiddleware, reportRoutes)
 
 // Admin routes (require admin role)
-app.use('/api/admin', authMiddleware, adminRoutes)
+app.use(`${API_VERSION}/admin`, authMiddleware, adminRoutes)
 
 // 404 handler
 app.use('*', (req, res) => {
@@ -159,17 +199,29 @@ process.on('SIGINT', async () => {
   process.exit(0)
 })
 
-// Start server
+// Start server with database connection
 const PORT = process.env.PORT || 5000
 
-if (process.env.NODE_ENV !== 'test') {
-  server.listen(PORT, () => {
-    logger.info(`🚀 UPC Conflict Resolver API server running on port ${PORT}`)
-    logger.info(`📊 Environment: ${process.env.NODE_ENV}`)
-    logger.info(`🔗 GraphQL Playground: http://localhost:${PORT}/graphql`)
-    logger.info(`📈 Bull Dashboard: http://localhost:${PORT}/admin/queues`)
-  })
+async function startServer() {
+  try {
+    // Connect to database with retry logic
+    await db.connectWithRetry();
+
+    if (process.env.NODE_ENV !== 'test') {
+      server.listen(PORT, () => {
+        logger.info(`🚀 UPC Conflict Resolver API server running on port ${PORT}`);
+        logger.info(`📊 Environment: ${process.env.NODE_ENV}`);
+        logger.info(`🔗 API Version: v1`);
+        logger.info(`📈 Bull Dashboard: http://localhost:${PORT}/admin/queues`);
+      });
+    }
+  } catch (error) {
+    logger.error('Failed to start server:', error);
+    process.exit(1);
+  }
 }
+
+startServer();
 
 export { app, server, io }
 export default app

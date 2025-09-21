@@ -1,34 +1,17 @@
 import express from 'express'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import { body, validationResult } from 'express-validator'
 import { PrismaClient } from '@prisma/client'
 import { asyncHandler, createApiError } from '../middleware/errorHandler'
 import { logger, logAudit, logSecurity } from '../utils/logger'
 import { authMiddleware, AuthenticatedRequest } from '../middleware/auth'
+import { validators, sanitizeInput } from '../middleware/validation'
 
 const router = express.Router()
 const prisma = new PrismaClient()
 
-// Validation rules
-const registerValidation = [
-  body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
-  body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
-  body('name').optional().isLength({ min: 1 }).withMessage('Name cannot be empty'),
-  body('organizationName').isLength({ min: 1 }).withMessage('Organization name is required'),
-  body('organizationSlug').optional().isLength({ min: 3 }).withMessage('Organization slug must be at least 3 characters'),
-]
-
-const loginValidation = [
-  body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
-  body('password').isLength({ min: 1 }).withMessage('Password is required'),
-]
-
-const inviteValidation = [
-  body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
-  body('role').isIn(['ADMIN', 'ANALYST', 'VIEWER']).withMessage('Valid role is required'),
-  body('name').optional().isLength({ min: 1 }).withMessage('Name cannot be empty'),
-]
+// Apply input sanitization to all routes
+router.use(sanitizeInput)
 
 // Helper function to generate JWT token
 const generateToken = (userId: string, email: string, organizationId: string) => {

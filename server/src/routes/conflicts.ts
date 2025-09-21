@@ -5,6 +5,7 @@ import { asyncHandler, createApiError } from '../middleware/errorHandler'
 import { requireAnalyst, AuthenticatedRequest } from '../middleware/auth'
 import { logger, logAudit } from '../utils/logger'
 import { generateResolutionSuggestions } from '../services/conflictAnalysis'
+import QueryOptimizer from '../utils/queryOptimizer'
 
 const router = express.Router()
 const prisma = new PrismaClient()
@@ -59,45 +60,26 @@ router.get('/', [
     ]
   }
 
+  // Use optimized query with proper pagination
+  const paginationConfig = QueryOptimizer.getPaginationConfig(page, limit);
+  const orderConfig = QueryOptimizer.createOrderBy('severity', 'desc', {
+    severity: 'desc',
+    createdAt: 'desc'
+  });
+
   const [conflicts, total] = await Promise.all([
     prisma.conflict.findMany({
       where,
-      skip,
-      take: limit,
-      orderBy: [
-        { severity: 'desc' },
-        { createdAt: 'desc' }
-      ],
-      include: {
-        assignedTo: {
-          select: {
-            id: true,
-            name: true,
-            email: true
-          }
-        },
-        resolvedBy: {
-          select: {
-            id: true,
-            name: true,
-            email: true
-          }
-        },
-        analysis: {
-          select: {
-            id: true,
-            fileName: true,
-            originalName: true
-          }
-        }
-      }
+      ...paginationConfig,
+      orderBy: orderConfig,
+      ...QueryOptimizer.getConflictsWithRelations()
     }),
     prisma.conflict.count({ where })
   ])
 
-  // Add resolution suggestions for each conflict
+  // Add resolution suggestions using optimized method
   const conflictsWithSuggestions = conflicts.map(conflict => {
-    const suggestions = generateResolutionSuggestions(conflict as any)
+    const suggestions = QueryOptimizer.generateOptimizedResolutionSuggestions(conflict);
 
     return {
       id: conflict.id,

@@ -37,10 +37,29 @@ async function main() {
 
   console.log(`📦 Created organization: ${organization.name}`)
 
-  // Create demo users
-  const adminPassword = await bcrypt.hash('admin123', 10)
-  const analystPassword = await bcrypt.hash('analyst123', 10)
-  const viewerPassword = await bcrypt.hash('viewer123', 10)
+  // Create demo users with environment-based passwords
+  // Use environment variables for passwords or generate random ones
+  const adminPassword = await bcrypt.hash(
+    process.env.SEED_ADMIN_PASSWORD ||
+    Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2).toUpperCase() + '!@#',
+    12
+  )
+  const analystPassword = await bcrypt.hash(
+    process.env.SEED_ANALYST_PASSWORD ||
+    Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2).toUpperCase() + '!@#',
+    12
+  )
+  const viewerPassword = await bcrypt.hash(
+    process.env.SEED_VIEWER_PASSWORD ||
+    Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2).toUpperCase() + '!@#',
+    12
+  )
+
+  // Log generated passwords if not using environment variables
+  if (!process.env.SEED_ADMIN_PASSWORD) {
+    console.log('⚠️  No SEED_ADMIN_PASSWORD env var found. Generated random password.');
+    console.log('   Set SEED_ADMIN_PASSWORD in .env to use a specific password.');
+  }
 
   const admin = await prisma.user.upsert({
     where: { email: 'admin@acmewarehouse.com' },

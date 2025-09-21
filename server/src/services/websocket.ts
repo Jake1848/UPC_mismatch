@@ -12,6 +12,11 @@ interface AuthenticatedSocket extends Socket {
 }
 
 export function setupWebSocket(io: SocketIOServer) {
+  // Error handling for socket server
+  io.on('error', (error) => {
+    logger.error('WebSocket server error:', error);
+  });
+
   // Authentication middleware
   io.use(async (socket: AuthenticatedSocket, next) => {
     try {
@@ -66,6 +71,15 @@ export function setupWebSocket(io: SocketIOServer) {
       organizationId: socket.organizationId
     })
 
+    // Error handling for socket
+    socket.on('error', (error) => {
+      logger.error('WebSocket client error:', {
+        socketId: socket.id,
+        userId: socket.userId,
+        error: error.message
+      });
+    })
+
     // Join organization-specific room
     if (socket.organizationId) {
       socket.join(`org:${socket.organizationId}`)
@@ -77,26 +91,39 @@ export function setupWebSocket(io: SocketIOServer) {
     }
 
     // Handle analysis progress subscription
-    socket.on('subscribe:analysis', (analysisId: string) => {
-      if (!analysisId) return
-
-      // Verify user has access to this analysis
-      prisma.analysis.findFirst({
-        where: {
-          id: analysisId,
-          organizationId: socket.organizationId
+    socket.on('subscribe:analysis', async (analysisId: string, callback?: (error?: string) => void) => {
+      try {
+        if (!analysisId) {
+          if (callback) callback('Analysis ID is required');
+          return;
         }
-      }).then(analysis => {
+
+        // Verify user has access to this analysis
+        const analysis = await prisma.analysis.findFirst({
+          where: {
+            id: analysisId,
+            organizationId: socket.organizationId
+          }
+        });
+
         if (analysis) {
-          socket.join(`analysis:${analysisId}`)
+          socket.join(`analysis:${analysisId}`);
           logger.debug('User subscribed to analysis updates', {
             userId: socket.userId,
             analysisId
-          })
+          });
+          if (callback) callback();
+        } else {
+          logger.warn('Unauthorized analysis subscription attempt', {
+            userId: socket.userId,
+            analysisId
+          });
+          if (callback) callback('Access denied to this analysis');
         }
-      }).catch(error => {
-        logger.error('Error verifying analysis access:', error)
-      })
+      } catch (error) {
+        logger.error('Error verifying analysis access:', error);
+        if (callback) callback('Failed to subscribe to analysis');
+      }
     })
 
     // Handle analysis progress unsubscription
@@ -143,8 +170,10 @@ export function setupWebSocket(io: SocketIOServer) {
     })
 
     // Handle ping/pong for connection health
-    socket.on('ping', () => {
-      socket.emit('pong', { timestamp: Date.now() })
+    socket.on('ping', (callback?: (data: any) => void) => {
+      const response = { timestamp: Date.now() };
+      socket.emit('pong', response);
+      if (callback) callback(response);
     })
 
     // Handle disconnection
@@ -153,7 +182,20 @@ export function setupWebSocket(io: SocketIOServer) {
         socketId: socket.id,
         userId: socket.userId,
         reason
-      })
+      });
+
+      // Clean up any pending operations for this socket
+      // This prevents memory leaks from orphaned listeners
+      socket.removeAllListeners();
+    })
+
+    // Handle connection errors
+    socket.on('connect_error', (error) => {
+      logger.error('WebSocket connection error:', {
+        socketId: socket.id,
+        userId: socket.userId,
+        error: error.message
+      });
     })
 
     // Send initial connection success
@@ -179,17 +221,24 @@ export class WebSocketNotifier {
     message?: string
     error?: string
   }) {
-    this.io.to(`analysis:${analysisId}`).emit('analysis:progress', {
-      analysisId,
-      ...progress,
-      timestamp: Date.now()
-    })
+    try {
+      this.io.to(`analysis:${analysisId}`).emit('analysis:progress', {
+        analysisId,
+        ...progress,
+        timestamp: Date.now()
+      });
 
-    logger.debug('Sent analysis progress update', {
-      analysisId,
-      status: progress.status,
-      progress: progress.progress
-    })
+      logger.debug('Sent analysis progress update', {
+        analysisId,
+        status: progress.status,
+        progress: progress.progress
+      });
+    } catch (error) {
+      logger.error('Failed to send analysis progress:', {
+        analysisId,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
   }
 
   // Send analysis completion notification
@@ -402,17 +451,27 @@ export class WebSocketNotifier {
 
   // Get connection stats
   getConnectionStats() {
-    const sockets = this.io.sockets.sockets
-    const connections = Array.from(sockets.values()) as AuthenticatedSocket[]
+    try {
+      const sockets = this.io.sockets.sockets;
+      const connections = Array.from(sockets.values()) as AuthenticatedSocket[];
 
-    const stats = {
-      totalConnections: connections.length,
-      organizations: new Set(connections.map(s => s.organizationId).filter(Boolean)).size,
-      users: new Set(connections.map(s => s.userId).filter(Boolean)).size,
-      rooms: Object.keys(this.io.sockets.adapter.rooms)
+      const stats = {
+        totalConnections: connections.length,
+        organizations: new Set(connections.map(s => s.organizationId).filter(Boolean)).size,
+        users: new Set(connections.map(s => s.userId).filter(Boolean)).size,
+        rooms: Object.keys(this.io.sockets.adapter.rooms)
+      };
+
+      return stats;
+    } catch (error) {
+      logger.error('Failed to get connection stats:', error);
+      return {
+        totalConnections: 0,
+        organizations: 0,
+        users: 0,
+        rooms: []
+      };
     }
-
-    return stats
   }
 }
 
