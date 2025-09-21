@@ -1,0 +1,153 @@
+# UPC Resolver API Testing Guide
+# Use this file with VS Code REST Client extension or copy to Postman
+
+### Variables
+@baseUrl = https://your-app.vercel.app/api/v1
+@token = your_jwt_token_here
+
+### 1. Health Check
+GET {{baseUrl}}/health
+Content-Type: application/json
+
+###
+
+### 2. Register New User
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "SecurePassword123!",
+  "organizationName": "Test Company",
+  "firstName": "John",
+  "lastName": "Doe"
+}
+
+###
+
+### 3. Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "SecurePassword123!"
+}
+
+###
+
+### 4. Get User Profile (requires token)
+GET {{baseUrl}}/auth/profile
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+###
+
+### 5. AI Analysis - Analyze UPC Conflict
+POST {{baseUrl}}/ai/analyze-conflict
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "upc": "123456789012",
+  "productName": "Test Product",
+  "description": "A sample product for testing",
+  "category": "Electronics",
+  "conflictContext": "Multiple products found with same UPC",
+  "existingData": [
+    {
+      "upc": "123456789012",
+      "name": "Product A",
+      "sku": "SKU-001"
+    },
+    {
+      "upc": "123456789012",
+      "name": "Product B",
+      "sku": "SKU-002"
+    }
+  ]
+}
+
+###
+
+### 6. AI Analysis - Detect Fraud
+POST {{baseUrl}}/ai/detect-fraud
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "upcData": [
+    {
+      "upc": "123456789012",
+      "name": "iPhone 15",
+      "price": 50,
+      "sku": "SUSPICIOUS-001"
+    },
+    {
+      "upc": "987654321098",
+      "name": "Generic Phone",
+      "price": 1200,
+      "sku": "NORMAL-001"
+    }
+  ]
+}
+
+###
+
+### 7. AI Analysis - Categorize Product
+POST {{baseUrl}}/ai/categorize-product
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "upc": "123456789012",
+  "name": "iPhone 15 Pro Max",
+  "description": "Latest smartphone with advanced camera system"
+}
+
+###
+
+### 8. Get AI Service Status
+GET {{baseUrl}}/ai/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+###
+
+### 9. Upload File for Analysis
+POST {{baseUrl}}/analyses/upload
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="test-upcs.csv"
+Content-Type: text/csv
+
+UPC,Product Name,SKU,Price
+123456789012,Test Product 1,SKU-001,19.99
+987654321098,Test Product 2,SKU-002,29.99
+123456789012,Duplicate UPC Product,SKU-003,39.99
+--boundary--
+
+###
+
+### 10. Get All Analyses
+GET {{baseUrl}}/analyses?page=1&limit=10
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+###
+
+### 11. Get Conflicts for Analysis
+GET {{baseUrl}}/conflicts?analysisId=YOUR_ANALYSIS_ID
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+###
+
+### 12. Organization Info
+GET {{baseUrl}}/organizations/current
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+###

@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: ServiceMonitor
+metadata:
+  name: upc-resolver-api-monitor
+  namespace: upc-resolver
+  labels:
+    app: upc-resolver-api
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: upc-resolver-api
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: upc-resolver-alerts
+  namespace: upc-resolver
+  labels:
+    app: upc-resolver-api
+    release: prometheus
+spec:
+  groups:
+  - name: upc-resolver-api
+    rules:
+    - alert: HighErrorRate
+      expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.1
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: "High error rate detected"
+        description: "Error rate is {{ $value }} errors per second"
+
+    - alert: HighResponseTime
+      expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High response time detected"
+        description: "95th percentile response time is {{ $value }}s"
+
+    - alert: PodCrashLooping
+      expr: rate(kube_pod_container_status_restarts_total[5m]) > 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Pod is crash looping"
+        description: "Pod {{ $labels.pod }} is restarting frequently"
+
+    - alert: DatabaseConnectionFailure
+      expr: up{job="upc-resolver-api"} == 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Database connection failure"
+        description: "Unable to connect to database"

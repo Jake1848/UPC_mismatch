@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: upc-resolver
+
+resources:
+- namespace.yaml
+- configmap.yaml
+- secrets.yaml
+- rbac.yaml
+- deployment.yaml
+- service.yaml
+- hpa.yaml
+- ingress.yaml
+- pod-disruption-budget.yaml
+- network-policy.yaml
+- monitoring.yaml
+
+images:
+- name: upc-resolver
+  newTag: latest
+
+replicas:
+- name: upc-resolver-api
+  count: 3
+
+commonLabels:
+  app.kubernetes.io/name: upc-resolver
+  app.kubernetes.io/version: v1.0.0
+  app.kubernetes.io/managed-by: kustomize

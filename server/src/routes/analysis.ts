@@ -7,6 +7,7 @@ import { uploadMiddleware, uploadToS3, deleteFromS3, validateFile } from '../ser
 import { processUploadedFile, validateProcessedData, convertToAnalysisRecords } from '../services/fileProcessor'
 import { detectColumns, validateColumnMapping } from '../services/columnDetection'
 import { analyzeConflicts, saveConflictsToDatabase } from '../services/conflictAnalysis'
+import { aiAnalysisService } from '../services/aiAnalysis'
 import { logger, logAudit, logPerformance } from '../utils/logger'
 
 const router = express.Router()

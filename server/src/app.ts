@@ -27,6 +27,7 @@ import webhookRoutes from './routes/webhooks'
 import reportRoutes from './routes/reports'
 import adminRoutes from './routes/admin'
 import healthRoutes from './routes/health'
+import aiRoutes from './routes/ai'
 
 // Import services
 import { setupWebSocket } from './services/websocket'
@@ -156,6 +157,7 @@ app.use(`${API_VERSION}/conflicts`, authMiddleware, organizationMiddleware, conf
 app.use(`${API_VERSION}/billing`, authMiddleware, organizationMiddleware, billingRoutes)
 app.use(`${API_VERSION}/integrations`, authMiddleware, organizationMiddleware, integrationRoutes)
 app.use(`${API_VERSION}/reports`, authMiddleware, organizationMiddleware, reportRoutes)
+app.use(`${API_VERSION}/ai`, authMiddleware, organizationMiddleware, aiRoutes)
 
 // Admin routes (require admin role)
 app.use(`${API_VERSION}/admin`, authMiddleware, adminRoutes)
