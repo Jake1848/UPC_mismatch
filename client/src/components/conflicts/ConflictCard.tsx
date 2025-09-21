@@ -120,16 +120,7 @@ export const ConflictCard: React.FC<ConflictCardProps> = ({
               </p>
             )}
 
-            {conflict.details && (
-              <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-                {Object.entries(conflict.details).map(([key, value]) => (
-                  <div key={key} className="flex justify-between">
-                    <span className="font-medium">{key}:</span>
-                    <span>{String(value)}</span>
-                  </div>
-                ))}
-              </div>
-            )}
+            {/* Additional conflict information could be displayed here */}
           </div>
         )}
 
