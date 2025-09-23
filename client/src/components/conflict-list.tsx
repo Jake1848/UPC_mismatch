@@ -4,10 +4,10 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { MagnifyingGlassIcon, ArrowsUpDownIcon, UserPlusIcon, CheckIcon } from "@heroicons/react/24/outline"
-import { conflictsApi } from "../../services/api.js"
-import { useWebSocket } from "../../services/websocket.js"
+import { conflictsApi } from "../services/api"
+import { useWebSocket } from "../services/websocket"
 import type { Conflict } from "../types/index"
-import { ConflictCard } from "./ConflictCard"
+import { ConflictCard } from "./conflict-card"
 // Inline glass card styling to avoid import issues
 import { toast } from "react-hot-toast"
 
@@ -108,7 +108,7 @@ export const ConflictList: React.FC<ConflictListProps> = ({
     setConflicts((prev) =>
       prev.map((conflict) =>
         conflict.id === data.conflictId
-          ? { ...conflict, status: "RESOLVED", resolvedAt: new Date().toISOString() }
+          ? { ...conflict, status: "RESOLVED", resolvedAt: new Date() }
           : conflict,
       ),
     )

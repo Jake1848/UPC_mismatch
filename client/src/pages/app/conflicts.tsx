@@ -4,7 +4,7 @@ import { ArrowLeftIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outl
 import { useRouter } from 'next/router'
 import { Conflict } from '../../types/index'
 import { ConflictList } from '../../components/conflicts/ConflictList'
-import { GlassCard } from '../../components/ui/glass-card'
+import { GlassCard } from '../../components/ui/GlassCard'
 import { ThemeToggle } from '../../components/ui/ThemeToggle'
 
 export default function ConflictsPage() {

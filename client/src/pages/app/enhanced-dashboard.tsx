@@ -16,8 +16,8 @@ import {
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline'
 import { useAuth } from '../../hooks/useAuth'
-import { useWebSocket } from '../../services/websocket.js'
-import { analysisApi, conflictsApi } from '../../services/api.js'
+import { useWebSocket } from '../../services/websocket'
+import { analysisApi, conflictsApi } from '../../services/api'
 import { toast } from 'react-hot-toast'
 
 // Import enhanced components

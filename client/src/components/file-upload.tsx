@@ -11,10 +11,10 @@ import {
   ArrowPathIcon,
 } from "@heroicons/react/24/outline"
 import { useDropzone } from "react-dropzone"
-import { analysisApi } from "../../services/api.js"
-import { useWebSocket } from "../../services/websocket.js"
+import { analysisApi } from "../services/api"
+import { useWebSocket } from "../services/websocket"
 import { toast } from "react-hot-toast"
-import { GlassCard } from "../ui/GlassCard"
+import { GlassCard } from "./ui/GlassCard"
 
 interface FileUploadProps {
   onUploadComplete?: (analysisId: string) => void
@@ -187,7 +187,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       {/* Upload Area */}
       <GlassCard className="overflow-hidden">
         <motion.div
-          {...getRootProps()}
+          {...((): any => {
+            const { onAnimationStart, onAnimationEnd, onTransitionEnd, ...rest } = getRootProps();
+            return rest;
+          })()}
           className={`
             relative p-12 text-center cursor-pointer transition-all duration-300
             ${

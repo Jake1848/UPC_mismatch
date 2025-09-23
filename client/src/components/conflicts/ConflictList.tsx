@@ -7,11 +7,11 @@ import {
   UserPlusIcon,
   CheckIcon
 } from '@heroicons/react/24/outline'
-import { conflictsApi } from '../../services/api.js'
-import { useWebSocket } from '../../services/websocket.js'
+import { conflictsApi } from '../../services/api'
+import { useWebSocket } from '../../services/websocket'
 import { Conflict, User } from '../../types/index'
 import { ConflictCard } from './ConflictCard'
-import { GlassCard } from '../ui/glass-card'
+import { GlassCard } from '../ui/GlassCard'
 import { toast } from 'react-hot-toast'
 
 interface ConflictListProps {
@@ -110,7 +110,7 @@ export const ConflictList: React.FC<ConflictListProps> = ({
   const handleConflictResolved = (data: any) => {
     setConflicts(prev => prev.map(conflict =>
       conflict.id === data.conflictId
-        ? { ...conflict, status: 'RESOLVED', resolvedAt: new Date().toISOString() }
+        ? { ...conflict, status: 'RESOLVED', resolvedAt: new Date() }
         : conflict
     ))
   }
