@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { MagnifyingGlassIcon, ArrowUpDownIcon, UserPlusIcon, CheckIcon } from "@heroicons/react/24/outline"
+import { MagnifyingGlassIcon, ArrowsUpDownIcon, UserPlusIcon, CheckIcon } from "@heroicons/react/24/outline"
 import { conflictsApi } from "../../services/api"
 import { useWebSocket } from "../../services/websocket"
 import type { Conflict } from "../types/index"
@@ -201,7 +201,7 @@ export const ConflictList: React.FC<ConflictListProps> = ({
                   onClick={() => handleSort("createdAt")}
                   className="flex items-center space-x-1 px-3 py-2 bg-white/50 dark:bg-gray-800/50 border border-white/20 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white hover:bg-white/60 dark:hover:bg-gray-800/60 transition-colors"
                 >
-                  <ArrowUpDownIcon className="w-4 h-4" />
+                  <ArrowsUpDownIcon className="w-4 h-4" />
                   <span>Sort</span>
                 </button>
               </div>
