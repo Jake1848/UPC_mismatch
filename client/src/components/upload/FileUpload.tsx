@@ -9,8 +9,8 @@ import {
   ArrowPathIcon
 } from '@heroicons/react/24/outline'
 import { useDropzone } from 'react-dropzone'
-import { analysisApi } from '../../services/api'
-import { useWebSocket } from '../../services/websocket'
+import { analysisApi } from '../../services/api.js'
+import { useWebSocket } from '../../services/websocket.js'
 import { toast } from 'react-hot-toast'
 import { GlassCard } from '../ui/glass-card'
 

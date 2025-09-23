@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/router'
 import { toast } from 'react-hot-toast'
-import { authApi, setAuthToken, removeAuthToken, setOrganizationId } from '../services/api'
-import { useWebSocket } from '../services/websocket'
+import { authApi, setAuthToken, removeAuthToken, setOrganizationId } from '../services/api.js'
+import { useWebSocket } from '../services/websocket.js'
 import { User, Organization } from '../types/index'
 
 interface AuthState {

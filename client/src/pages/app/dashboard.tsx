@@ -12,8 +12,8 @@ import {
   UsersIcon
 } from '@heroicons/react/24/outline'
 import { useAuth } from '../../hooks/useAuth'
-import { useWebSocket } from '../../services/websocket'
-import { analysisApi, conflictsApi } from '../../services/api'
+import { useWebSocket } from '../../services/websocket.js'
+import { analysisApi, conflictsApi } from '../../services/api.js'
 import { Analysis, Conflict } from '../../types/index'
 import { GlassCard } from '../../components/ui/glass-card'
 import { ThemeToggle } from '../../components/ui/ThemeToggle'

@@ -12,7 +12,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/router'
 import { useAuth } from '../../hooks/useAuth'
-import { billingApi, organizationApi } from '../../services/api'
+import { billingApi, organizationApi } from '../../services/api.js'
 import { GlassCard } from '../../components/ui/glass-card'
 import { ThemeToggle } from '../../components/ui/ThemeToggle'
 import { toast } from 'react-hot-toast'

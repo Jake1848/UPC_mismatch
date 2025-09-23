@@ -7,8 +7,8 @@ import {
   UserPlusIcon,
   CheckIcon
 } from '@heroicons/react/24/outline'
-import { conflictsApi } from '../../services/api'
-import { useWebSocket } from '../../services/websocket'
+import { conflictsApi } from '../../services/api.js'
+import { useWebSocket } from '../../services/websocket.js'
 import { Conflict, User } from '../../types/index'
 import { ConflictCard } from './ConflictCard'
 import { GlassCard } from '../ui/glass-card'
