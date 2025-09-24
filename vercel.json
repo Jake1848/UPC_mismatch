@@ -1,5 +1,7 @@
 {
   "version": 2,
+  "buildCommand": "cd client && npm run build",
+  "outputDirectory": "client/.next",
   "builds": [
     {
       "src": "api/index.ts",
@@ -7,10 +9,7 @@
     },
     {
       "src": "client/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "build"
-      }
+      "use": "@vercel/next"
     }
   ],
   "routes": [
@@ -20,7 +19,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/client/build/$1"
+      "dest": "/client$1"
     }
   ],
   "env": {
