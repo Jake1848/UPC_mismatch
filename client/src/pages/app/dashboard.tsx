@@ -207,7 +207,7 @@ export default function Dashboard() {
                     Team Members
                   </p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {organization?.memberCount || 1}
+                    {(organization as any)?.memberCount || organization?.maxUsers || 1}
                   </p>
                 </div>
                 <div className="p-3 rounded-full bg-purple-100 dark:bg-purple-900/30">
@@ -264,11 +264,11 @@ export default function Dashboard() {
                       </div>
                       <div className="text-right">
                         <p className="text-xs text-gray-600 dark:text-gray-400">
-                          {analysis.totalRows?.toLocaleString()} rows
+                          {analysis.totalRecords?.toLocaleString()} rows
                         </p>
-                        {analysis.conflictCount > 0 && (
+                        {analysis.duplicateUPCs > 0 && (
                           <p className="text-xs text-red-600 dark:text-red-400">
-                            {analysis.conflictCount} conflicts
+                            {analysis.duplicateUPCs} conflicts
                           </p>
                         )}
                       </div>

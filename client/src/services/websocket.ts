@@ -85,7 +85,7 @@ class WebSocketService {
 
     this.socket.on('conflict:assigned', (data) => {
       this.emit('conflict:assigned', data)
-      toast.info('You have been assigned a new conflict')
+      toast('You have been assigned a new conflict', { icon: 'ℹ️' })
     })
 
     this.socket.on('conflict:resolved', (data) => {

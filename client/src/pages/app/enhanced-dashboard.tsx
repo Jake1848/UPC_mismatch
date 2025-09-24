@@ -95,14 +95,14 @@ export default function EnhancedDashboard() {
       ])
 
       setStats({
-        totalAnalyses: analyses.total || 0,
-        totalConflicts: conflicts.total || 0,
-        pendingConflicts: conflicts.pending || 0,
-        resolvedConflicts: conflicts.resolved || 0,
-        totalRows: analyses.totalRows || 0,
-        avgProcessingTime: analyses.avgTime || 0,
+        totalAnalyses: analyses.data?.total || 0,
+        totalConflicts: conflicts.data?.total || 0,
+        pendingConflicts: conflicts.data?.pending || 0,
+        resolvedConflicts: conflicts.data?.resolved || 0,
+        totalRows: analyses.data?.totalRows || 0,
+        avgProcessingTime: analyses.data?.avgTime || 0,
         aiAccuracy: 94.5,
-        fraudDetected: conflicts.fraudulent || 0
+        fraudDetected: conflicts.data?.fraudulent || 0
       })
     } catch (error) {
       console.error('Failed to load dashboard data:', error)
@@ -302,7 +302,7 @@ export default function EnhancedDashboard() {
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
             Recent Conflicts
           </h2>
-          <ConflictList limit={5} />
+          <ConflictList compact={true} />
         </motion.div>
       </main>
 

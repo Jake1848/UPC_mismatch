@@ -42,7 +42,7 @@ export default function SettingsPage() {
 
   const [orgForm, setOrgForm] = useState({
     name: organization?.name || '',
-    settings: organization?.settings || {}
+    settings: (organization as any)?.settings || {}
   })
 
   const trialStatus = checkTrialStatus()
@@ -419,7 +419,7 @@ export default function SettingsPage() {
                           <div className="p-4 bg-white/50 dark:bg-gray-800/50 rounded-lg border border-white/20 dark:border-white/10">
                             <p className="text-sm text-gray-600 dark:text-gray-400">Team Members</p>
                             <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                              {organization?.memberCount || 1}
+                              {(organization as any)?.memberCount || organization?.maxUsers || 1}
                             </p>
                           </div>
                         </div>

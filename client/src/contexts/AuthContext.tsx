@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const token = localStorage.getItem('token')
       if (token) {
         const userData = await authApi.getProfile()
-        setUser(userData)
+        setUser(userData.data)
       }
     } catch (error) {
       localStorage.removeItem('token')
@@ -47,8 +47,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       const response = await authApi.login({ email, password })
-      localStorage.setItem('token', response.token)
-      setUser(response.user)
+      localStorage.setItem('token', response.data.token)
+      setUser(response.data.user)
       router.push('/app/enhanced-dashboard')
     } catch (error) {
       throw error
@@ -58,8 +58,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (userData: any) => {
     try {
       const response = await authApi.register(userData)
-      localStorage.setItem('token', response.token)
-      setUser(response.user)
+      localStorage.setItem('token', response.data.token)
+      setUser(response.data.user)
       router.push('/app/enhanced-dashboard')
     } catch (error) {
       throw error
