@@ -1,15 +1,14 @@
 {
   "version": 2,
+  "functions": {
+    "client/src/pages/**/*.{js,ts,tsx}": {
+      "runtime": "@vercel/next@4.3.5"
+    }
+  },
   "builds": [
     {
-      "src": "client/package.json",
+      "src": "client/next.config.js",
       "use": "@vercel/next"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/client$1"
     }
   ]
 }
