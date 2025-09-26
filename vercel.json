@@ -3,14 +3,12 @@
   "builds": [
     {
       "src": "client/package.json",
-      "use": "@vercel/static-build",
+      "use": "@vercel/next",
       "config": {
-        "distDir": "client/.next"
+        "projectSettings": {
+          "outputDirectory": ".next"
+        }
       }
     }
-  ],
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/client/$1" }
   ]
 }
