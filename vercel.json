@@ -1,7 +1,5 @@
 {
   "version": 2,
-  "buildCommand": "cd client && npm run build",
-  "outputDirectory": "client/.next",
   "builds": [
     {
       "src": "api/index.ts",
