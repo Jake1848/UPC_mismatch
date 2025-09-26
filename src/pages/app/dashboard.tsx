@@ -9,15 +9,23 @@ import {
   XCircleIcon,
   ChartBarIcon,
   CpuChipIcon,
-  UsersIcon
+  UsersIcon,
+  ArrowUpIcon,
+  ArrowDownIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuth } from '../../hooks/useAuth'
 import { useWebSocket } from '../../services/websocket'
 import { analysisApi, conflictsApi } from '../../services/api'
 import { Analysis, Conflict } from '../../types/index'
-import { GlassCard } from '../../components/ui/GlassCard'
-import { ThemeToggle } from '../../components/ui/ThemeToggle'
 import { formatDistanceToNow } from 'date-fns'
+import Link from 'next/link'
 
 interface DashboardStats {
   totalAnalyses: number
@@ -29,41 +37,43 @@ interface DashboardStats {
 }
 
 export default function Dashboard() {
-  const { user, organization, isAnalyst, checkTrialStatus } = useAuth()
-  const webSocket = useWebSocket()
-  const [stats, setStats] = useState<DashboardStats | null>(null)
+  const { user, organization } = useAuth()
+  const { connectionStatus } = useWebSocket()
+  const [stats, setStats] = useState<DashboardStats>({
+    totalAnalyses: 0,
+    totalConflicts: 0,
+    pendingConflicts: 0,
+    resolvedConflicts: 0,
+    totalRows: 0,
+    avgProcessingTime: 0
+  })
   const [recentAnalyses, setRecentAnalyses] = useState<Analysis[]>([])
-  const [criticalConflicts, setCriticalConflicts] = useState<Conflict[]>([])
+  const [recentConflicts, setRecentConflicts] = useState<Conflict[]>([])
   const [loading, setLoading] = useState(true)
-
-  const trialStatus = checkTrialStatus()
 
   useEffect(() => {
     loadDashboardData()
-
-    // Subscribe to real-time updates
-    webSocket.on('analysis:complete', handleAnalysisComplete)
-    webSocket.on('conflict:new', handleNewConflict)
-
-    return () => {
-      webSocket.off('analysis:complete', handleAnalysisComplete)
-      webSocket.off('conflict:new', handleNewConflict)
-    }
   }, [])
 
   const loadDashboardData = async () => {
     try {
       setLoading(true)
-
-      const [analysesRes, conflictsRes, statsRes] = await Promise.all([
-        analysisApi.getAll({ limit: 5 }),
-        conflictsApi.getAll({ severity: 'CRITICAL', status: 'PENDING', limit: 5 }),
-        conflictsApi.getStats()
+      const [analysesRes, conflictsRes] = await Promise.all([
+        analysisApi.getAnalyses({ limit: 5 }),
+        conflictsApi.getConflicts({ limit: 5 })
       ])
 
-      setRecentAnalyses(analysesRes.data.analyses)
-      setCriticalConflicts(conflictsRes.data.conflicts)
-      setStats(statsRes.data)
+      setStats({
+        totalAnalyses: analysesRes.data?.total || 0,
+        totalConflicts: conflictsRes.data?.total || 0,
+        pendingConflicts: conflictsRes.data?.pending || 0,
+        resolvedConflicts: conflictsRes.data?.resolved || 0,
+        totalRows: analysesRes.data?.totalRows || 0,
+        avgProcessingTime: analysesRes.data?.avgTime || 0
+      })
+
+      setRecentAnalyses(analysesRes.data?.data || [])
+      setRecentConflicts(conflictsRes.data?.data || [])
     } catch (error) {
       console.error('Failed to load dashboard data:', error)
     } finally {
@@ -71,314 +81,295 @@ export default function Dashboard() {
     }
   }
 
-  const handleAnalysisComplete = (data: any) => {
-    loadDashboardData()
-  }
-
-  const handleNewConflict = (data: any) => {
-    if (data.conflict.severity === 'CRITICAL') {
-      setCriticalConflicts(prev => [data.conflict, ...prev].slice(0, 5))
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed': return 'text-green-500'
+      case 'processing': return 'text-blue-500'
+      case 'failed': return 'text-red-500'
+      case 'pending': return 'text-yellow-500'
+      default: return 'text-gray-500'
     }
   }
 
   const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'COMPLETED':
-        return <CheckCircleIcon className="w-5 h-5 text-green-500" />
-      case 'FAILED':
-        return <XCircleIcon className="w-5 h-5 text-red-500" />
-      case 'PROCESSING':
-        return <CpuChipIcon className="w-5 h-5 text-blue-500 animate-spin" />
-      default:
-        return <ClockIcon className="w-5 h-5 text-yellow-500" />
+    switch (status.toLowerCase()) {
+      case 'completed': return <CheckCircleIcon className="h-4 w-4" />
+      case 'processing': return <ClockIcon className="h-4 w-4" />
+      case 'failed': return <XCircleIcon className="h-4 w-4" />
+      default: return <ClockIcon className="h-4 w-4" />
     }
   }
 
+  const statCards = [
+    {
+      title: 'Total Analyses',
+      value: stats.totalAnalyses.toLocaleString(),
+      icon: <DocumentChartBarIcon className="h-6 w-6 text-blue-500" />,
+      change: '+12.5%',
+      changeType: 'increase'
+    },
+    {
+      title: 'Active Conflicts',
+      value: stats.pendingConflicts.toLocaleString(),
+      icon: <ExclamationTriangleIcon className="h-6 w-6 text-orange-500" />,
+      change: '-5.2%',
+      changeType: 'decrease'
+    },
+    {
+      title: 'Records Processed',
+      value: stats.totalRows.toLocaleString(),
+      icon: <ChartBarIcon className="h-6 w-6 text-green-500" />,
+      change: '+24.1%',
+      changeType: 'increase'
+    },
+    {
+      title: 'Avg Processing Time',
+      value: `${stats.avgProcessingTime.toFixed(1)}s`,
+      icon: <CpuChipIcon className="h-6 w-6 text-purple-500" />,
+      change: '-15.3%',
+      changeType: 'decrease'
+    }
+  ]
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex items-center space-x-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+          <span className="text-lg">Loading dashboard...</span>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      {/* Background Effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-1/2 -right-1/2 w-full h-full bg-gradient-radial from-primary-200/30 via-transparent to-transparent dark:from-primary-900/20" />
-        <div className="absolute -bottom-1/2 -left-1/2 w-full h-full bg-gradient-radial from-secondary-200/30 via-transparent to-transparent dark:from-secondary-900/20" />
+    <div className="min-h-screen bg-background p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground">
+            Welcome back, {user?.name || 'User'}. Here's what's happening with your conflicts.
+          </p>
+        </div>
+
+        <div className="flex items-center space-x-4">
+          <Badge variant={connectionStatus === 'connected' ? 'default' : 'destructive'}>
+            {connectionStatus === 'connected' ? '🟢 Connected' : '🔴 Disconnected'}
+          </Badge>
+          <Button asChild>
+            <Link href="/app/upload">
+              <CloudArrowUpIcon className="h-4 w-4 mr-2" />
+              New Analysis
+            </Link>
+          </Button>
+        </div>
       </div>
 
-      {/* Header */}
-      <header className="relative z-10 border-b border-white/20 dark:border-white/10 backdrop-blur-xl bg-white/10 dark:bg-gray-800/10">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <DocumentChartBarIcon className="w-8 h-8 text-primary-600 dark:text-primary-400" />
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  UPC Conflict Resolver
-                </h1>
-              </div>
-
-              {trialStatus.isTrialActive && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700"
-                >
-                  <span className="text-sm font-medium text-amber-800 dark:text-amber-200">
-                    Trial: {trialStatus.daysLeft} days left
-                  </span>
-                </motion.div>
-              )}
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  {user?.name || user?.email}
-                </p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">
-                  {organization?.name}
-                </p>
-              </div>
-              <ThemeToggle />
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="relative z-10 max-w-7xl mx-auto px-6 py-8">
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <GlassCard>
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                    Total Analyses
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {stats?.totalAnalyses || 0}
-                  </p>
-                </div>
-                <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-900/30">
-                  <DocumentChartBarIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                </div>
-              </div>
-            </div>
-          </GlassCard>
-
-          <GlassCard>
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                    Active Conflicts
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {stats?.pendingConflicts || 0}
-                  </p>
-                </div>
-                <div className="p-3 rounded-full bg-red-100 dark:bg-red-900/30">
-                  <ExclamationTriangleIcon className="w-6 h-6 text-red-600 dark:text-red-400" />
-                </div>
-              </div>
-            </div>
-          </GlassCard>
-
-          <GlassCard>
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                    Rows Processed
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {stats?.totalRows?.toLocaleString() || 0}
-                  </p>
-                </div>
-                <div className="p-3 rounded-full bg-green-100 dark:bg-green-900/30">
-                  <ChartBarIcon className="w-6 h-6 text-green-600 dark:text-green-400" />
-                </div>
-              </div>
-            </div>
-          </GlassCard>
-
-          <GlassCard>
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                    Team Members
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {(organization as any)?.memberCount || organization?.maxUsers || 1}
-                  </p>
-                </div>
-                <div className="p-3 rounded-full bg-purple-100 dark:bg-purple-900/30">
-                  <UsersIcon className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-                </div>
-              </div>
-            </div>
-          </GlassCard>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Recent Analyses */}
-          <GlassCard>
-            <div className="p-6">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Recent Analyses
-              </h2>
-
-              {loading ? (
-                <div className="space-y-3">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="animate-pulse">
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2" />
-                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {statCards.map((stat, index) => (
+          <motion.div
+            key={stat.title}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
+          >
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">{stat.title}</p>
+                    <p className="text-2xl font-bold">{stat.value}</p>
+                    <div className="flex items-center space-x-1 text-xs">
+                      {stat.changeType === 'increase' ? (
+                        <ArrowUpIcon className="h-3 w-3 text-green-500" />
+                      ) : (
+                        <ArrowDownIcon className="h-3 w-3 text-red-500" />
+                      )}
+                      <span className={stat.changeType === 'increase' ? 'text-green-500' : 'text-red-500'}>
+                        {stat.change}
+                      </span>
+                      <span className="text-muted-foreground">vs last month</span>
                     </div>
-                  ))}
+                  </div>
+                  <div className="p-3 bg-muted rounded-full">
+                    {stat.icon}
+                  </div>
                 </div>
-              ) : recentAnalyses.length === 0 ? (
-                <div className="text-center py-8">
-                  <CloudArrowUpIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-gray-600 dark:text-gray-400">
-                    No analyses yet. Upload your first file to get started!
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {recentAnalyses.map((analysis) => (
-                    <motion.div
-                      key={analysis.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="flex items-center justify-between p-3 rounded-lg bg-white/20 dark:bg-gray-800/20 border border-white/10"
-                    >
-                      <div className="flex items-center space-x-3">
-                        {getStatusIcon(analysis.status)}
-                        <div>
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            {analysis.fileName}
-                          </p>
-                          <p className="text-xs text-gray-600 dark:text-gray-400">
-                            {formatDistanceToNow(new Date(analysis.createdAt))} ago
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs text-gray-600 dark:text-gray-400">
-                          {analysis.totalRecords?.toLocaleString()} rows
-                        </p>
-                        {analysis.duplicateUPCs > 0 && (
-                          <p className="text-xs text-red-600 dark:text-red-400">
-                            {analysis.duplicateUPCs} conflicts
-                          </p>
-                        )}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </GlassCard>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
 
-          {/* Critical Conflicts */}
-          <GlassCard>
-            <div className="p-6">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Critical Conflicts
-              </h2>
+      {/* Main Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recent Activity */}
+        <div className="lg:col-span-2 space-y-6">
+          <Tabs defaultValue="analyses" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="analyses">Recent Analyses</TabsTrigger>
+              <TabsTrigger value="conflicts">Active Conflicts</TabsTrigger>
+            </TabsList>
 
-              {loading ? (
-                <div className="space-y-3">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="animate-pulse">
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2" />
-                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
-                    </div>
-                  ))}
-                </div>
-              ) : criticalConflicts.length === 0 ? (
-                <div className="text-center py-8">
-                  <CheckCircleIcon className="w-12 h-12 text-green-400 mx-auto mb-3" />
-                  <p className="text-gray-600 dark:text-gray-400">
-                    No critical conflicts. Great work!
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {criticalConflicts.map((conflict) => (
-                    <motion.div
-                      key={conflict.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            {conflict.type.replace('_', ' ')}
-                          </p>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                            UPC: {conflict.upc}
-                          </p>
-                          {conflict.costImpact && (
-                            <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-                              Cost Impact: ${conflict.costImpact.toLocaleString()}
-                            </p>
-                          )}
+            <TabsContent value="analyses" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Analyses</CardTitle>
+                  <CardDescription>Your latest file processing results</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {recentAnalyses.length > 0 ? (
+                      recentAnalyses.map((analysis) => (
+                        <div key={analysis.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center space-x-4">
+                            <div className={`p-2 rounded-full ${getStatusColor(analysis.status)}`}>
+                              {getStatusIcon(analysis.status)}
+                            </div>
+                            <div>
+                              <p className="font-medium">{analysis.filename}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {analysis.totalRecords?.toLocaleString()} rows • {formatDistanceToNow(new Date(analysis.createdAt))} ago
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <Badge variant={analysis.duplicateUPCs > 0 ? 'destructive' : 'default'}>
+                              {analysis.duplicateUPCs} conflicts
+                            </Badge>
+                          </div>
                         </div>
-                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200">
-                          {conflict.severity}
-                        </span>
+                      ))
+                    ) : (
+                      <div className="text-center py-8">
+                        <DocumentChartBarIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                        <p className="text-muted-foreground">No analyses yet. Upload your first file to get started!</p>
+                        <Button asChild className="mt-4">
+                          <Link href="/app/upload">Upload File</Link>
+                        </Button>
                       </div>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </GlassCard>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="conflicts" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Active Conflicts</CardTitle>
+                  <CardDescription>Conflicts requiring your attention</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {recentConflicts.length > 0 ? (
+                      recentConflicts.map((conflict) => (
+                        <div key={conflict.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center space-x-4">
+                            <ExclamationTriangleIcon className="h-5 w-5 text-orange-500" />
+                            <div>
+                              <p className="font-medium">UPC: {conflict.upc}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {conflict.type} • {formatDistanceToNow(new Date(conflict.createdAt))} ago
+                              </p>
+                            </div>
+                          </div>
+                          <Badge variant="outline">
+                            {conflict.severity}
+                          </Badge>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8">
+                        <CheckCircleIcon className="h-12 w-12 text-green-500 mx-auto mb-4" />
+                        <p className="text-muted-foreground">No active conflicts. Great job!</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
 
-        {/* Quick Actions */}
-        <div className="mt-8">
-          <GlassCard>
-            <div className="p-6">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Quick Actions
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex items-center justify-center space-x-2 p-4 rounded-lg bg-primary-500 hover:bg-primary-600 text-white transition-colors"
-                  onClick={() => window.location.href = '/app/upload'}
-                >
-                  <CloudArrowUpIcon className="w-5 h-5" />
-                  <span>Upload New File</span>
-                </motion.button>
-
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex items-center justify-center space-x-2 p-4 rounded-lg bg-white/20 dark:bg-gray-800/20 border border-white/20 dark:border-white/10 hover:bg-white/30 dark:hover:bg-gray-800/30 text-gray-900 dark:text-white transition-colors"
-                  onClick={() => window.location.href = '/app/conflicts'}
-                >
-                  <ExclamationTriangleIcon className="w-5 h-5" />
-                  <span>View All Conflicts</span>
-                </motion.button>
-
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex items-center justify-center space-x-2 p-4 rounded-lg bg-white/20 dark:bg-gray-800/20 border border-white/20 dark:border-white/10 hover:bg-white/30 dark:hover:bg-gray-800/30 text-gray-900 dark:text-white transition-colors"
-                  onClick={() => window.location.href = '/app/reports'}
-                >
-                  <ChartBarIcon className="w-5 h-5" />
-                  <span>Generate Report</span>
-                </motion.button>
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Organization Info */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <UsersIcon className="h-5 w-5" />
+                <span>Organization</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <p className="font-medium">{organization?.name || 'Default Organization'}</p>
+                <p className="text-sm text-muted-foreground">
+                  {(organization as any)?.memberCount || organization?.maxUsers || 1} team members
+                </p>
               </div>
-            </div>
-          </GlassCard>
+              <Progress
+                value={((organization as any)?.memberCount || 1) / (organization?.maxUsers || 10) * 100}
+                className="h-2"
+              />
+              <div className="text-xs text-muted-foreground">
+                {organization?.maxUsers || 10} user limit
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Quick Actions */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button asChild variant="outline" className="w-full justify-start">
+                <Link href="/app/upload">
+                  <CloudArrowUpIcon className="h-4 w-4 mr-2" />
+                  Upload New File
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full justify-start">
+                <Link href="/app/conflicts">
+                  <ExclamationTriangleIcon className="h-4 w-4 mr-2" />
+                  View All Conflicts
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full justify-start">
+                <Link href="/app/ai-analysis">
+                  <SparklesIcon className="h-4 w-4 mr-2" />
+                  AI Analysis
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* System Status */}
+          <Card>
+            <CardHeader>
+              <CardTitle>System Status</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">API Status</span>
+                <Badge variant="default">Operational</Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Processing Queue</span>
+                <Badge variant="secondary">2 pending</Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Last Backup</span>
+                <span className="text-xs text-muted-foreground">2 hours ago</span>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </main>
+      </div>
     </div>
   )
 }

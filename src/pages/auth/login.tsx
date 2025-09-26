@@ -4,11 +4,17 @@ import {
   EyeIcon,
   EyeSlashIcon,
   DocumentChartBarIcon,
-  ArrowRightIcon
+  ArrowRightIcon,
+  ShieldCheckIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuth } from '../../hooks/useAuth'
-import { GlassCard } from '../../components/ui/GlassCard'
-import { ThemeToggle } from '../../components/ui/ThemeToggle'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 
@@ -41,6 +47,8 @@ export default function LoginPage() {
     } catch (error: any) {
       if (error.response?.data?.field) {
         setErrors({ [error.response.data.field]: error.response.data.message })
+      } else {
+        setErrors({ general: 'Login failed. Please check your credentials.' })
       }
     }
   }
@@ -48,225 +56,184 @@ export default function LoginPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
+    // Clear errors when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }))
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-6">
-      {/* Background Effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-1/2 -right-1/2 w-full h-full bg-gradient-radial from-primary-200/30 via-transparent to-transparent dark:from-primary-900/20" />
-        <div className="absolute -bottom-1/2 -left-1/2 w-full h-full bg-gradient-radial from-secondary-200/30 via-transparent to-transparent dark:from-secondary-900/20" />
-
-        {/* Floating Elements */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-md mx-auto">
         <motion.div
-          animate={{
-            y: [0, -20, 0],
-            rotate: [0, 5, 0]
-          }}
-          transition={{
-            duration: 6,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="absolute top-1/4 left-1/4 w-32 h-32 bg-primary-200/20 dark:bg-primary-800/20 rounded-full blur-xl"
-        />
-        <motion.div
-          animate={{
-            y: [0, 20, 0],
-            rotate: [0, -5, 0]
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-secondary-200/20 dark:bg-secondary-800/20 rounded-full blur-xl"
-        />
-      </div>
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="space-y-6"
+        >
+          {/* Header */}
+          <div className="text-center space-y-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4"
+            >
+              <DocumentChartBarIcon className="h-8 w-8 text-primary" />
+            </motion.div>
 
-      {/* Theme Toggle */}
-      <div className="absolute top-6 right-6">
-        <ThemeToggle />
-      </div>
-
-      {/* Login Form */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md relative z-10"
-      >
-        <GlassCard className="overflow-hidden">
-          <div className="p-8">
-            {/* Logo and Header */}
-            <div className="text-center mb-8">
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="flex items-center justify-center space-x-2 mb-4"
-              >
-                <DocumentChartBarIcon className="w-10 h-10 text-primary-600 dark:text-primary-400" />
-                <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                  UPC Resolver
-                </span>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-              >
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  Welcome back
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Sign in to your warehouse analytics platform
-                </p>
-              </motion.div>
+            <div className="space-y-2">
+              <h1 className="text-3xl font-bold">Welcome Back</h1>
+              <p className="text-muted-foreground">
+                Sign in to your UPC Conflict Resolver account
+              </p>
             </div>
 
-            {/* Form */}
-            <motion.form
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-              onSubmit={handleSubmit}
-              className="space-y-6"
-            >
-              {/* Email Field */}
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={`
-                    w-full px-4 py-3 bg-white/50 dark:bg-gray-800/50 border rounded-lg
-                    focus:ring-2 focus:ring-primary-500 focus:border-transparent
-                    text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400
-                    transition-colors duration-200
-                    ${errors.email
-                      ? 'border-red-300 dark:border-red-600'
-                      : 'border-white/20 dark:border-white/10'
-                    }
-                  `}
-                  placeholder="Enter your email"
-                  disabled={loading}
-                />
-                {errors.email && (
-                  <motion.p
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-1 text-sm text-red-600 dark:text-red-400"
-                  >
-                    {errors.email}
-                  </motion.p>
-                )}
-              </div>
+            <div className="flex items-center justify-center space-x-2">
+              <Badge variant="secondary" className="text-xs">
+                <ShieldCheckIcon className="h-3 w-3 mr-1" />
+                Enterprise Secure
+              </Badge>
+              <Badge variant="outline" className="text-xs">
+                <SparklesIcon className="h-3 w-3 mr-1" />
+                AI Powered
+              </Badge>
+            </div>
+          </div>
 
-              {/* Password Field */}
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    id="password"
-                    name="password"
-                    value={formData.password}
+          {/* Login Form */}
+          <Card className="glass-morphism-dark border-white/10 bg-background/50">
+            <CardHeader className="space-y-1 pb-4">
+              <CardTitle className="text-xl text-center">Sign In</CardTitle>
+              <CardDescription className="text-center">
+                Enter your credentials to access the platform
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {errors.general && (
+                  <Alert variant="destructive">
+                    <AlertDescription>{errors.general}</AlertDescription>
+                  </Alert>
+                )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={formData.email}
                     onChange={handleChange}
-                    className={`
-                      w-full px-4 py-3 pr-12 bg-white/50 dark:bg-gray-800/50 border rounded-lg
-                      focus:ring-2 focus:ring-primary-500 focus:border-transparent
-                      text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400
-                      transition-colors duration-200
-                      ${errors.password
-                        ? 'border-red-300 dark:border-red-600'
-                        : 'border-white/20 dark:border-white/10'
-                      }
-                    `}
-                    placeholder="Enter your password"
+                    className={errors.email ? 'border-destructive' : ''}
                     disabled={loading}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                  >
-                    {showPassword ? (
-                      <EyeSlashIcon className="w-5 h-5" />
-                    ) : (
-                      <EyeIcon className="w-5 h-5" />
-                    )}
-                  </button>
+                  {errors.email && (
+                    <p className="text-sm text-destructive">{errors.email}</p>
+                  )}
                 </div>
-                {errors.password && (
-                  <motion.p
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-1 text-sm text-red-600 dark:text-red-400"
+
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Enter your password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      className={`pr-10 ${errors.password ? 'border-destructive' : ''}`}
+                      disabled={loading}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                      disabled={loading}
+                    >
+                      {showPassword ? (
+                        <EyeSlashIcon className="h-4 w-4" />
+                      ) : (
+                        <EyeIcon className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                  {errors.password && (
+                    <p className="text-sm text-destructive">{errors.password}</p>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="remember"
+                      className="rounded border-border"
+                    />
+                    <Label htmlFor="remember" className="text-sm font-normal">
+                      Remember me
+                    </Label>
+                  </div>
+                  <Link
+                    href="/auth/forgot-password"
+                    className="text-primary hover:underline"
                   >
-                    {errors.password}
-                  </motion.p>
-                )}
-              </div>
+                    Forgot password?
+                  </Link>
+                </div>
 
-              {/* Submit Button */}
-              <motion.button
-                type="submit"
-                disabled={loading}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-lg transition-colors duration-200 disabled:cursor-not-allowed"
-              >
-                {loading ? (
-                  <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <span>Sign In</span>
-                    <ArrowRightIcon className="w-5 h-5" />
-                  </>
-                )}
-              </motion.button>
-            </motion.form>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  size="lg"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-background border-t-transparent" />
+                      <span>Signing in...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <span>Sign In</span>
+                      <ArrowRightIcon className="h-4 w-4" />
+                    </div>
+                  )}
+                </Button>
+              </form>
 
-            {/* Footer */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.8 }}
-              className="mt-8 text-center"
-            >
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Don't have an account?{' '}
-                <Link href="/auth/register" className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium">
-                  Sign up for free
-                </Link>
-              </p>
-
-              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-xs text-gray-500 dark:text-gray-500">
-                  Trusted by warehouses worldwide for UPC conflict resolution
+              <div className="mt-6 pt-6 border-t border-border/50">
+                <p className="text-center text-sm text-muted-foreground">
+                  Don't have an account?{' '}
+                  <Link
+                    href="/auth/register"
+                    className="text-primary hover:underline font-medium"
+                  >
+                    Sign up for free
+                  </Link>
                 </p>
               </div>
-            </motion.div>
-          </div>
+            </CardContent>
+          </Card>
 
-          {/* Shimmer Effect */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute -top-1/2 -left-1/2 w-full h-full opacity-10 bg-gradient-to-r from-transparent via-white to-transparent transform rotate-45 translate-x-[-100%] animate-shimmer" />
+          {/* Footer */}
+          <div className="text-center text-xs text-muted-foreground space-y-2">
+            <p>Secured with enterprise-grade encryption</p>
+            <div className="flex items-center justify-center space-x-4">
+              <Link href="/terms" className="hover:text-foreground">Terms</Link>
+              <span>•</span>
+              <Link href="/privacy" className="hover:text-foreground">Privacy</Link>
+              <span>•</span>
+              <Link href="/support" className="hover:text-foreground">Support</Link>
+            </div>
           </div>
-        </GlassCard>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   )
 }

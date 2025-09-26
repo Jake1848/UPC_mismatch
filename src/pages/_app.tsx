@@ -1,5 +1,6 @@
 import type { AppProps } from 'next/app'
 import { useRouter } from 'next/router'
+import { ThemeProvider } from 'next-themes'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from '../contexts/AuthContext'
 import { AppLayout } from '../components/layout/AppLayout'
@@ -12,28 +13,35 @@ export default function App({ Component, pageProps }: AppProps) {
   const isPublicRoute = publicRoutes.includes(router.pathname)
 
   return (
-    <AuthProvider>
-      <div className="min-h-screen">
-        {isPublicRoute ? (
-          <Component {...pageProps} />
-        ) : (
-          <AppLayout>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="dark"
+      enableSystem={false}
+      disableTransitionOnChange
+    >
+      <AuthProvider>
+        <div className="min-h-screen bg-background text-foreground">
+          {isPublicRoute ? (
             <Component {...pageProps} />
-          </AppLayout>
-        )}
+          ) : (
+            <AppLayout>
+              <Component {...pageProps} />
+            </AppLayout>
+          )}
 
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 4000,
-            style: {
-              background: 'hsl(var(--card))',
-              color: 'hsl(var(--card-foreground))',
-              border: '1px solid hsl(var(--border))',
-            },
-          }}
-        />
-      </div>
-    </AuthProvider>
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: 'hsl(var(--card))',
+                color: 'hsl(var(--card-foreground))',
+                border: '1px solid hsl(var(--border))',
+              },
+            }}
+          />
+        </div>
+      </AuthProvider>
+    </ThemeProvider>
   )
 }
