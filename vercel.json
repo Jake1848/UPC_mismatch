@@ -2,13 +2,8 @@
   "version": 2,
   "builds": [
     {
-      "src": "client/package.json",
-      "use": "@vercel/next",
-      "config": {
-        "projectSettings": {
-          "outputDirectory": ".next"
-        }
-      }
+      "src": "package.json",
+      "use": "@vercel/next"
     }
   ]
 }
