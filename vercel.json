@@ -1,14 +1,6 @@
 {
-  "version": 2,
-  "functions": {
-    "client/src/pages/**/*.{js,ts,tsx}": {
-      "runtime": "@vercel/next@4.3.5"
-    }
-  },
-  "builds": [
-    {
-      "src": "client/next.config.js",
-      "use": "@vercel/next"
-    }
-  ]
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "installCommand": "npm install",
+  "rootDirectory": "client"
 }
