@@ -9,7 +9,7 @@ import { useWebSocket } from "../services/websocket"
 import type { Conflict } from "../types/index"
 import { ConflictCard } from "./conflict-card"
 // Inline glass card styling to avoid import issues
-import { toast } from "react-hot-toast"
+import { toast } from "./ui/use-toast"
 
 interface ConflictListProps {
   analysisId?: string

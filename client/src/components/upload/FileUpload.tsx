@@ -11,7 +11,7 @@ import {
 import { useDropzone } from 'react-dropzone'
 import { analysisApi } from '../../services/api'
 import { useWebSocket } from '../../services/websocket'
-import { toast } from 'react-hot-toast'
+import { toast } from '../ui/use-toast'
 import { GlassCard } from '../ui/GlassCard'
 
 interface FileUploadProps {

@@ -1,5 +1,5 @@
 import { io, Socket } from 'socket.io-client'
-import { toast } from 'react-hot-toast'
+import { toast } from '../components/ui/use-toast'
 import { NotificationMessage } from '../types/index'
 
 class WebSocketService {
@@ -85,7 +85,7 @@ class WebSocketService {
 
     this.socket.on('conflict:assigned', (data) => {
       this.emit('conflict:assigned', data)
-      toast('You have been assigned a new conflict', { icon: 'ℹ️' })
+      toast.info('You have been assigned a new conflict')
     })
 
     this.socket.on('conflict:resolved', (data) => {
@@ -145,7 +145,7 @@ class WebSocketService {
                 toast.success(data.message)
                 break
               default:
-                toast(data.message)
+                toast.info(data.message)
             }
           }
       }

@@ -18,7 +18,7 @@ import {
 import { useAuth } from '../../hooks/useAuth'
 import { useWebSocket } from '../../services/websocket'
 import { analysisApi, conflictsApi } from '../../services/api'
-import { toast } from 'react-hot-toast'
+import { toast } from '../../components/ui/use-toast'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 

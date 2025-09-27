@@ -8,7 +8,10 @@ import {
   CheckIcon
 } from '@heroicons/react/24/outline'
 import { useAuth } from '../../hooks/useAuth'
-import { GlassCard } from '../../components/ui/GlassCard'
+import { Card, CardContent } from '../../components/ui/card'
+import { Button } from '../../components/ui/button'
+import { Input } from '../../components/ui/input'
+import { Label } from '../../components/ui/label'
 import { ThemeToggle } from '../../components/ui/ThemeToggle'
 import Link from 'next/link'
 
@@ -142,8 +145,8 @@ export default function RegisterPage() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-lg relative z-10"
       >
-        <GlassCard className="overflow-hidden">
-          <div className="p-8">
+        <Card className="overflow-hidden">
+          <CardContent className="p-8">
             {/* Logo and Header */}
             <div className="text-center mb-8">
               <motion.div
@@ -183,43 +186,33 @@ export default function RegisterPage() {
               {/* Personal Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <Label htmlFor="name">
                     Full Name (Optional)
-                  </label>
-                  <input
+                  </Label>
+                  <Input
                     type="text"
                     id="name"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-white/50 dark:bg-gray-800/50 border border-white/20 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors duration-200"
                     placeholder="Your name"
                     disabled={loading}
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <Label htmlFor="email">
                     Email Address *
-                  </label>
-                  <input
+                  </Label>
+                  <Input
                     type="email"
                     id="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className={`
-                      w-full px-4 py-3 bg-white/50 dark:bg-gray-800/50 border rounded-lg
-                      focus:ring-2 focus:ring-primary-500 focus:border-transparent
-                      text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400
-                      transition-colors duration-200
-                      ${errors.email
-                        ? 'border-red-300 dark:border-red-600'
-                        : 'border-white/20 dark:border-white/10'
-                      }
-                    `}
                     placeholder="work@company.com"
                     disabled={loading}
+                    className={errors.email ? 'border-destructive' : ''}
                   />
                   {errors.email && (
                     <motion.p
@@ -235,27 +228,18 @@ export default function RegisterPage() {
 
               {/* Organization Information */}
               <div>
-                <label htmlFor="organizationName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <Label htmlFor="organizationName">
                   Organization Name *
-                </label>
-                <input
+                </Label>
+                <Input
                   type="text"
                   id="organizationName"
                   name="organizationName"
                   value={formData.organizationName}
                   onChange={handleChange}
-                  className={`
-                    w-full px-4 py-3 bg-white/50 dark:bg-gray-800/50 border rounded-lg
-                    focus:ring-2 focus:ring-primary-500 focus:border-transparent
-                    text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400
-                    transition-colors duration-200
-                    ${errors.organizationName
-                      ? 'border-red-300 dark:border-red-600'
-                      : 'border-white/20 dark:border-white/10'
-                    }
-                  `}
                   placeholder="Your company name"
                   disabled={loading}
+                  className={errors.organizationName ? 'border-destructive' : ''}
                 />
                 {errors.organizationName && (
                   <motion.p
@@ -271,28 +255,19 @@ export default function RegisterPage() {
               {/* Password Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <Label htmlFor="password">
                     Password *
-                  </label>
+                  </Label>
                   <div className="relative">
-                    <input
+                    <Input
                       type={showPassword ? 'text' : 'password'}
                       id="password"
                       name="password"
                       value={formData.password}
                       onChange={handleChange}
-                      className={`
-                        w-full px-4 py-3 pr-12 bg-white/50 dark:bg-gray-800/50 border rounded-lg
-                        focus:ring-2 focus:ring-primary-500 focus:border-transparent
-                        text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400
-                        transition-colors duration-200
-                        ${errors.password
-                          ? 'border-red-300 dark:border-red-600'
-                          : 'border-white/20 dark:border-white/10'
-                        }
-                      `}
                       placeholder="Create password"
                       disabled={loading}
+                      className={`pr-12 ${errors.password ? 'border-destructive' : ''}`}
                     />
                     <button
                       type="button"
@@ -318,28 +293,19 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <Label htmlFor="confirmPassword">
                     Confirm Password *
-                  </label>
+                  </Label>
                   <div className="relative">
-                    <input
+                    <Input
                       type={showConfirmPassword ? 'text' : 'password'}
                       id="confirmPassword"
                       name="confirmPassword"
                       value={formData.confirmPassword}
                       onChange={handleChange}
-                      className={`
-                        w-full px-4 py-3 pr-12 bg-white/50 dark:bg-gray-800/50 border rounded-lg
-                        focus:ring-2 focus:ring-primary-500 focus:border-transparent
-                        text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400
-                        transition-colors duration-200
-                        ${errors.confirmPassword
-                          ? 'border-red-300 dark:border-red-600'
-                          : 'border-white/20 dark:border-white/10'
-                        }
-                      `}
                       placeholder="Confirm password"
                       disabled={loading}
+                      className={`pr-12 ${errors.confirmPassword ? 'border-destructive' : ''}`}
                     />
                     <button
                       type="button"
@@ -395,13 +361,15 @@ export default function RegisterPage() {
               )}
 
               {/* Submit Button */}
-              <motion.button
-                type="submit"
-                disabled={loading}
+              <motion.div
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-lg transition-colors duration-200 disabled:cursor-not-allowed"
               >
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full flex items-center justify-center space-x-2"
+                >
                 {loading ? (
                   <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                 ) : (
@@ -410,7 +378,8 @@ export default function RegisterPage() {
                     <ArrowRightIcon className="w-5 h-5" />
                   </>
                 )}
-              </motion.button>
+                </Button>
+              </motion.div>
             </motion.form>
 
             {/* Footer */}
@@ -433,13 +402,13 @@ export default function RegisterPage() {
                 </p>
               </div>
             </motion.div>
-          </div>
+          </CardContent>
 
           {/* Shimmer Effect */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute -top-1/2 -left-1/2 w-full h-full opacity-10 bg-gradient-to-r from-transparent via-white to-transparent transform rotate-45 translate-x-[-100%] animate-shimmer" />
           </div>
-        </GlassCard>
+        </Card>
       </motion.div>
     </div>
   )

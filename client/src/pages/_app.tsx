@@ -1,6 +1,6 @@
 import type { AppProps } from 'next/app'
 import { useRouter } from 'next/router'
-import { Toaster } from 'react-hot-toast'
+import { Toaster } from '../components/ui/toaster'
 import { ThemeProvider } from 'next-themes'
 import { AuthProvider } from '../contexts/AuthContext'
 import { AppLayout } from '../components/layout/AppLayout'
@@ -24,17 +24,7 @@ export default function App({ Component, pageProps }: AppProps) {
             </AppLayout>
           )}
 
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              duration: 4000,
-              style: {
-                background: 'hsl(var(--card))',
-                color: 'hsl(var(--card-foreground))',
-                border: '1px solid hsl(var(--border))',
-              },
-            }}
-          />
+          <Toaster />
         </div>
       </AuthProvider>
     </ThemeProvider>

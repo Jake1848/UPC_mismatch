@@ -168,6 +168,47 @@ function toast({ ...props }: Toast) {
   }
 }
 
+// Convenience methods to match react-hot-toast API
+toast.success = (message: string, options?: Partial<Toast> | { duration?: number }) => {
+  // Extract duration and other options separately
+  const { duration, ...toastOptions } = options || {}
+  return toast({
+    title: message,
+    variant: 'default',
+    ...toastOptions,
+  })
+}
+
+toast.error = (message: string, options?: Partial<Toast> | { duration?: number }) => {
+  // Extract duration and other options separately
+  const { duration, ...toastOptions } = options || {}
+  return toast({
+    title: message,
+    variant: 'destructive',
+    ...toastOptions,
+  })
+}
+
+toast.info = (message: string, options?: Partial<Toast> | { duration?: number }) => {
+  // Extract duration and other options separately
+  const { duration, ...toastOptions } = options || {}
+  return toast({
+    title: message,
+    variant: 'default',
+    ...toastOptions,
+  })
+}
+
+toast.loading = (message: string, options?: Partial<Toast> | { duration?: number }) => {
+  // Extract duration and other options separately
+  const { duration, ...toastOptions } = options || {}
+  return toast({
+    title: message,
+    variant: 'default',
+    ...toastOptions,
+  })
+}
+
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
 

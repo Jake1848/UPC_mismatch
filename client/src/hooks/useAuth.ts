@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/router'
-import { toast } from 'react-hot-toast'
+import { toast } from '../components/ui/use-toast'
 import { authApi, setAuthToken, removeAuthToken, setOrganizationId } from '../services/api'
 import { useWebSocket } from '../services/websocket'
 import { User, Organization } from '../types/index'

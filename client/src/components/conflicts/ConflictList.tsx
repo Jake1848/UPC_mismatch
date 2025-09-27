@@ -12,7 +12,7 @@ import { useWebSocket } from '../../services/websocket'
 import { Conflict, User } from '../../types/index'
 import { ConflictCard } from './ConflictCard'
 import { GlassCard } from '../ui/GlassCard'
-import { toast } from 'react-hot-toast'
+import { toast } from '../ui/use-toast'
 
 interface ConflictListProps {
   analysisId?: string
