@@ -17,7 +17,12 @@ const nextConfig = {
 
   // Webpack configuration
   webpack: (config, { isServer }) => {
-    // Add any custom webpack configuration here
+    // Exclude ui-export folder from compilation
+    config.module.rules.push({
+      test: /\.(tsx?|jsx?)$/,
+      exclude: [/node_modules/, /ui-export/],
+    })
+
     return config
   },
 
