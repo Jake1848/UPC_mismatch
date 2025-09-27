@@ -406,7 +406,7 @@ export default function RegisterPage() {
 
           {/* Shimmer Effect */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute -top-1/2 -left-1/2 w-full h-full opacity-10 bg-gradient-to-r from-transparent via-white to-transparent transform rotate-45 translate-x-[-100%] animate-shimmer" />
+            <div className="absolute inset-0 opacity-5 bg-gradient-to-r from-transparent via-white to-transparent transform translate-x-[-100%] animate-shimmer" />
           </div>
         </Card>
       </motion.div>
