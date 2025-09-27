@@ -11,6 +11,10 @@ import {
   XCircleIcon
 } from '@heroicons/react/24/outline'
 import { toast } from 'react-hot-toast'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
 
 interface AnalysisResult {
   id: string
@@ -171,89 +175,67 @@ export default function AIAnalysisPage() {
       </div>
 
       {/* Test Data Input */}
-      <div className="bg-card rounded-2xl p-6 border border-border">
-        <h2 className="text-xl font-bold text-foreground mb-4">Test Data</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-2">UPC</label>
-            <input
-              type="text"
-              value={testData.upc}
-              onChange={(e) => setTestData(prev => ({ ...prev, upc: e.target.value }))}
-              className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
-            />
+      <Card>
+        <CardHeader>
+          <CardTitle>Test Data</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="upc">UPC</Label>
+              <Input id="upc" value={testData.upc} onChange={(e) => setTestData(prev => ({ ...prev, upc: e.target.value }))} />
+            </div>
+            <div>
+              <Label htmlFor="productName">Product Name</Label>
+              <Input id="productName" value={testData.productName} onChange={(e) => setTestData(prev => ({ ...prev, productName: e.target.value }))} />
+            </div>
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Input id="description" value={testData.description} onChange={(e) => setTestData(prev => ({ ...prev, description: e.target.value }))} />
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-2">Product Name</label>
-            <input
-              type="text"
-              value={testData.productName}
-              onChange={(e) => setTestData(prev => ({ ...prev, productName: e.target.value }))}
-              className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-2">Description</label>
-            <input
-              type="text"
-              value={testData.description}
-              onChange={(e) => setTestData(prev => ({ ...prev, description: e.target.value }))}
-              className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* AI Analysis Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <motion.button
-          onClick={runConflictAnalysis}
-          disabled={isLoading}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-2xl p-6 hover:shadow-lg transition-all disabled:opacity-50"
-        >
-          <ExclamationTriangleIcon className="w-8 h-8 mb-4" />
-          <h3 className="text-lg font-bold mb-2">Conflict Analysis</h3>
-          <p className="text-blue-100 text-sm">AI-powered conflict resolution with Claude</p>
-        </motion.button>
-
-        <motion.button
-          onClick={runFraudDetection}
-          disabled={isLoading}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="bg-gradient-to-r from-red-500 to-orange-400 text-white rounded-2xl p-6 hover:shadow-lg transition-all disabled:opacity-50"
-        >
-          <ShieldCheckIcon className="w-8 h-8 mb-4" />
-          <h3 className="text-lg font-bold mb-2">Fraud Detection</h3>
-          <p className="text-red-100 text-sm">Detect suspicious UPC patterns</p>
-        </motion.button>
-
-        <motion.button
-          onClick={runCategorization}
-          disabled={isLoading}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="bg-gradient-to-r from-green-500 to-emerald-400 text-white rounded-2xl p-6 hover:shadow-lg transition-all disabled:opacity-50"
-        >
-          <ChartBarIcon className="w-8 h-8 mb-4" />
-          <h3 className="text-lg font-bold mb-2">Auto-Categorization</h3>
-          <p className="text-green-100 text-sm">Intelligent product categorization</p>
-        </motion.button>
+        <Button onClick={runConflictAnalysis} disabled={isLoading} className="h-auto py-6 text-left justify-start bg-gradient-to-r from-blue-500 to-cyan-400">
+          <div>
+            <ExclamationTriangleIcon className="w-8 h-8 mb-2" />
+            <div className="font-bold">Conflict Analysis</div>
+            <div className="text-sm opacity-80">AI-powered conflict resolution with Claude</div>
+          </div>
+        </Button>
+        <Button onClick={runFraudDetection} disabled={isLoading} className="h-auto py-6 text-left justify-start bg-gradient-to-r from-red-500 to-orange-400">
+          <div>
+            <ShieldCheckIcon className="w-8 h-8 mb-2" />
+            <div className="font-bold">Fraud Detection</div>
+            <div className="text-sm opacity-80">Detect suspicious UPC patterns</div>
+          </div>
+        </Button>
+        <Button onClick={runCategorization} disabled={isLoading} className="h-auto py-6 text-left justify-start bg-gradient-to-r from-green-500 to-emerald-400">
+          <div>
+            <ChartBarIcon className="w-8 h-8 mb-2" />
+            <div className="font-bold">Auto-Categorization</div>
+            <div className="text-sm opacity-80">Intelligent product categorization</div>
+          </div>
+        </Button>
       </div>
 
       {/* Analysis Results */}
-      <div className="bg-card rounded-2xl p-6 border border-border">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-foreground">Recent Analysis Results</h2>
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle>Recent Analysis Results</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-end mb-3">
           {isLoading && (
             <div className="flex items-center space-x-2 text-muted-foreground">
               <ArrowPathIcon className="w-4 h-4 animate-spin" />
               <span className="text-sm">Processing...</span>
             </div>
           )}
-        </div>
+          </div>
 
         {analyses.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
@@ -315,7 +297,8 @@ export default function AIAnalysisPage() {
             ))}
           </div>
         )}
-      </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

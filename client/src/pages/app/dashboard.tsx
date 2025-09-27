@@ -15,8 +15,10 @@ import { useAuth } from '../../hooks/useAuth'
 import { useWebSocket } from '../../services/websocket'
 import { analysisApi, conflictsApi } from '../../services/api'
 import { Analysis, Conflict } from '../../types/index'
-import { GlassCard } from '../../components/ui/GlassCard'
 import { ThemeToggle } from '../../components/ui/ThemeToggle'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 
 interface DashboardStats {
@@ -145,8 +147,8 @@ export default function Dashboard() {
       <main className="relative z-10 max-w-7xl mx-auto px-6 py-8">
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <GlassCard>
-            <div className="p-6">
+          <Card>
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -160,11 +162,11 @@ export default function Dashboard() {
                   <DocumentChartBarIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
               </div>
-            </div>
-          </GlassCard>
+            </CardContent>
+          </Card>
 
-          <GlassCard>
-            <div className="p-6">
+          <Card>
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -178,11 +180,11 @@ export default function Dashboard() {
                   <ExclamationTriangleIcon className="w-6 h-6 text-red-600 dark:text-red-400" />
                 </div>
               </div>
-            </div>
-          </GlassCard>
+            </CardContent>
+          </Card>
 
-          <GlassCard>
-            <div className="p-6">
+          <Card>
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -196,11 +198,11 @@ export default function Dashboard() {
                   <ChartBarIcon className="w-6 h-6 text-green-600 dark:text-green-400" />
                 </div>
               </div>
-            </div>
-          </GlassCard>
+            </CardContent>
+          </Card>
 
-          <GlassCard>
-            <div className="p-6">
+          <Card>
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -214,17 +216,17 @@ export default function Dashboard() {
                   <UsersIcon className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                 </div>
               </div>
-            </div>
-          </GlassCard>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Recent Analyses */}
-          <GlassCard>
-            <div className="p-6">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Recent Analyses
-              </h2>
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Analyses</CardTitle>
+            </CardHeader>
+            <CardContent>
 
               {loading ? (
                 <div className="space-y-3">
@@ -276,15 +278,15 @@ export default function Dashboard() {
                   ))}
                 </div>
               )}
-            </div>
-          </GlassCard>
+            </CardContent>
+          </Card>
 
           {/* Critical Conflicts */}
-          <GlassCard>
-            <div className="p-6">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Critical Conflicts
-              </h2>
+          <Card>
+            <CardHeader>
+              <CardTitle>Critical Conflicts</CardTitle>
+            </CardHeader>
+            <CardContent>
 
               {loading ? (
                 <div className="space-y-3">
@@ -333,50 +335,36 @@ export default function Dashboard() {
                   ))}
                 </div>
               )}
-            </div>
-          </GlassCard>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Quick Actions */}
         <div className="mt-8">
-          <GlassCard>
-            <div className="p-6">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Quick Actions
-              </h2>
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex items-center justify-center space-x-2 p-4 rounded-lg bg-primary-500 hover:bg-primary-600 text-white transition-colors"
-                  onClick={() => window.location.href = '/app/upload'}
-                >
-                  <CloudArrowUpIcon className="w-5 h-5" />
-                  <span>Upload New File</span>
-                </motion.button>
-
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex items-center justify-center space-x-2 p-4 rounded-lg bg-white/20 dark:bg-gray-800/20 border border-white/20 dark:border-white/10 hover:bg-white/30 dark:hover:bg-gray-800/30 text-gray-900 dark:text-white transition-colors"
-                  onClick={() => window.location.href = '/app/conflicts'}
-                >
-                  <ExclamationTriangleIcon className="w-5 h-5" />
-                  <span>View All Conflicts</span>
-                </motion.button>
-
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex items-center justify-center space-x-2 p-4 rounded-lg bg-white/20 dark:bg-gray-800/20 border border-white/20 dark:border-white/10 hover:bg-white/30 dark:hover:bg-gray-800/30 text-gray-900 dark:text-white transition-colors"
-                  onClick={() => window.location.href = '/app/reports'}
-                >
-                  <ChartBarIcon className="w-5 h-5" />
-                  <span>Generate Report</span>
-                </motion.button>
+                <Button asChild>
+                  <Link href="/app/upload">
+                    <CloudArrowUpIcon className="w-4 h-4 mr-2" /> Upload New File
+                  </Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link href="/app/conflicts">
+                    <ExclamationTriangleIcon className="w-4 h-4 mr-2" /> View All Conflicts
+                  </Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link href="/app/reports">
+                    <ChartBarIcon className="w-4 h-4 mr-2" /> Generate Report
+                  </Link>
+                </Button>
               </div>
-            </div>
-          </GlassCard>
+            </CardContent>
+          </Card>
         </div>
       </main>
     </div>

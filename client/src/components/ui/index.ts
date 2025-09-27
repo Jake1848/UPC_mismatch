@@ -1,2 +1,2 @@
 export { GlassCard } from './GlassCard'
-export { ThemeToggle } from './ThemeToggle'
+export { ThemeToggle } from './theme-toggle'

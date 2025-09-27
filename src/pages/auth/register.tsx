@@ -5,12 +5,16 @@ import {
   EyeSlashIcon,
   DocumentChartBarIcon,
   ArrowRightIcon,
-  CheckIcon
+  CheckIcon,
 } from '@heroicons/react/24/outline'
-import { useAuth } from '../../hooks/useAuth'
-import { GlassCard } from '../../components/ui/GlassCard'
-import { ThemeToggle } from '../../components/ui/ThemeToggle'
 import Link from 'next/link'
+import { useAuth } from '../../hooks/useAuth'
+import { ThemeToggle } from '../../components/ui/ThemeToggle'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export default function RegisterPage() {
   const { register, loading } = useAuth()
@@ -97,349 +101,173 @@ export default function RegisterPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-6">
-      {/* Background Effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-1/2 -right-1/2 w-full h-full bg-gradient-radial from-primary-200/30 via-transparent to-transparent dark:from-primary-900/20" />
-        <div className="absolute -bottom-1/2 -left-1/2 w-full h-full bg-gradient-radial from-secondary-200/30 via-transparent to-transparent dark:from-secondary-900/20" />
-
-        {/* Floating Elements */}
-        <motion.div
-          animate={{
-            y: [0, -20, 0],
-            rotate: [0, 5, 0]
-          }}
-          transition={{
-            duration: 6,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="absolute top-1/4 left-1/4 w-32 h-32 bg-primary-200/20 dark:bg-primary-800/20 rounded-full blur-xl"
-        />
-        <motion.div
-          animate={{
-            y: [0, 20, 0],
-            rotate: [0, -5, 0]
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-secondary-200/20 dark:bg-secondary-800/20 rounded-full blur-xl"
-        />
-      </div>
-
-      {/* Theme Toggle */}
+    <div className="min-h-screen bg-background flex items-center justify-center p-6 relative">
       <div className="absolute top-6 right-6">
         <ThemeToggle />
       </div>
 
-      {/* Register Form */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-lg relative z-10"
+        transition={{ duration: 0.4 }}
+        className="w-full max-w-xl"
       >
-        <GlassCard className="overflow-hidden">
-          <div className="p-8">
-            {/* Logo and Header */}
-            <div className="text-center mb-8">
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="flex items-center justify-center space-x-2 mb-4"
-              >
-                <DocumentChartBarIcon className="w-10 h-10 text-primary-600 dark:text-primary-400" />
-                <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                  UPC Resolver
-                </span>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-              >
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  Start your free trial
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Create your account and organization
-                </p>
-              </motion.div>
+        <Card>
+          <CardHeader className="space-y-2 text-center">
+            <div className="flex items-center justify-center space-x-2">
+              <DocumentChartBarIcon className="w-8 h-8 text-primary" />
+              <span className="text-2xl font-bold">UPC Resolver</span>
             </div>
+            <CardTitle>Start your free trial</CardTitle>
+            <CardDescription>Create your account and organization</CardDescription>
+          </CardHeader>
 
-            {/* Form */}
-            <motion.form
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-              onSubmit={handleSubmit}
-              className="space-y-6"
-            >
-              {/* Personal Information */}
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Personal */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Full Name (Optional)
-                  </label>
-                  <input
-                    type="text"
+                  <Label htmlFor="name">Full Name (optional)</Label>
+                  <Input
                     id="name"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-white/50 dark:bg-gray-800/50 border border-white/20 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors duration-200"
                     placeholder="Your name"
                     disabled={loading}
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Email Address *
-                  </label>
-                  <input
-                    type="email"
+                  <Label htmlFor="email">Email Address *</Label>
+                  <Input
                     id="email"
                     name="email"
+                    type="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className={`
-                      w-full px-4 py-3 bg-white/50 dark:bg-gray-800/50 border rounded-lg
-                      focus:ring-2 focus:ring-primary-500 focus:border-transparent
-                      text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400
-                      transition-colors duration-200
-                      ${errors.email
-                        ? 'border-red-300 dark:border-red-600'
-                        : 'border-white/20 dark:border-white/10'
-                      }
-                    `}
                     placeholder="work@company.com"
+                    className={errors.email ? 'border-destructive' : ''}
                     disabled={loading}
                   />
                   {errors.email && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mt-1 text-sm text-red-600 dark:text-red-400"
-                    >
-                      {errors.email}
-                    </motion.p>
+                    <p className="mt-1 text-sm text-destructive">{errors.email}</p>
                   )}
                 </div>
               </div>
 
-              {/* Organization Information */}
+              {/* Organization */}
               <div>
-                <label htmlFor="organizationName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Organization Name *
-                </label>
-                <input
-                  type="text"
+                <Label htmlFor="organizationName">Organization Name *</Label>
+                <Input
                   id="organizationName"
                   name="organizationName"
                   value={formData.organizationName}
                   onChange={handleChange}
-                  className={`
-                    w-full px-4 py-3 bg-white/50 dark:bg-gray-800/50 border rounded-lg
-                    focus:ring-2 focus:ring-primary-500 focus:border-transparent
-                    text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400
-                    transition-colors duration-200
-                    ${errors.organizationName
-                      ? 'border-red-300 dark:border-red-600'
-                      : 'border-white/20 dark:border-white/10'
-                    }
-                  `}
                   placeholder="Your company name"
+                  className={errors.organizationName ? 'border-destructive' : ''}
                   disabled={loading}
                 />
                 {errors.organizationName && (
-                  <motion.p
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-1 text-sm text-red-600 dark:text-red-400"
-                  >
-                    {errors.organizationName}
-                  </motion.p>
+                  <p className="mt-1 text-sm text-destructive">{errors.organizationName}</p>
                 )}
               </div>
 
-              {/* Password Fields */}
+              {/* Passwords */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Password *
-                  </label>
+                  <Label htmlFor="password">Password *</Label>
                   <div className="relative">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
+                    <Input
                       id="password"
                       name="password"
+                      type={showPassword ? 'text' : 'password'}
                       value={formData.password}
                       onChange={handleChange}
-                      className={`
-                        w-full px-4 py-3 pr-12 bg-white/50 dark:bg-gray-800/50 border rounded-lg
-                        focus:ring-2 focus:ring-primary-500 focus:border-transparent
-                        text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400
-                        transition-colors duration-200
-                        ${errors.password
-                          ? 'border-red-300 dark:border-red-600'
-                          : 'border-white/20 dark:border-white/10'
-                        }
-                      `}
                       placeholder="Create password"
+                      className={errors.password ? 'pr-10 border-destructive' : 'pr-10'}
                       disabled={loading}
                     />
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-1 top-1/2 -translate-y-1/2"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                      disabled={loading}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
-                      {showPassword ? (
-                        <EyeSlashIcon className="w-5 h-5" />
-                      ) : (
-                        <EyeIcon className="w-5 h-5" />
-                      )}
-                    </button>
+                      {showPassword ? <EyeSlashIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+                    </Button>
                   </div>
                   {errors.password && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mt-1 text-sm text-red-600 dark:text-red-400"
-                    >
-                      {errors.password}
-                    </motion.p>
+                    <p className="mt-1 text-sm text-destructive">{errors.password}</p>
                   )}
                 </div>
 
                 <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Confirm Password *
-                  </label>
+                  <Label htmlFor="confirmPassword">Confirm Password *</Label>
                   <div className="relative">
-                    <input
-                      type={showConfirmPassword ? 'text' : 'password'}
+                    <Input
                       id="confirmPassword"
                       name="confirmPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
                       value={formData.confirmPassword}
                       onChange={handleChange}
-                      className={`
-                        w-full px-4 py-3 pr-12 bg-white/50 dark:bg-gray-800/50 border rounded-lg
-                        focus:ring-2 focus:ring-primary-500 focus:border-transparent
-                        text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400
-                        transition-colors duration-200
-                        ${errors.confirmPassword
-                          ? 'border-red-300 dark:border-red-600'
-                          : 'border-white/20 dark:border-white/10'
-                        }
-                      `}
                       placeholder="Confirm password"
+                      className={errors.confirmPassword ? 'pr-10 border-destructive' : 'pr-10'}
                       disabled={loading}
                     />
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-1 top-1/2 -translate-y-1/2"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                      disabled={loading}
+                      aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                     >
-                      {showConfirmPassword ? (
-                        <EyeSlashIcon className="w-5 h-5" />
-                      ) : (
-                        <EyeIcon className="w-5 h-5" />
-                      )}
-                    </button>
+                      {showConfirmPassword ? <EyeSlashIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+                    </Button>
                   </div>
                   {errors.confirmPassword && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mt-1 text-sm text-red-600 dark:text-red-400"
-                    >
-                      {errors.confirmPassword}
-                    </motion.p>
+                    <p className="mt-1 text-sm text-destructive">{errors.confirmPassword}</p>
                   )}
                 </div>
               </div>
 
-              {/* Password Requirements */}
+              {/* Password requirements */}
               {formData.password && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="p-3 bg-gray-50 dark:bg-gray-800/30 rounded-lg"
-                >
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Password Requirements:
-                  </p>
+                <div className="rounded-md border p-3 text-sm">
+                  <p className="font-medium mb-2">Password requirements</p>
                   <div className="grid grid-cols-2 gap-2">
-                    {passwordRequirements.map((req, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                          req.met ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'
-                        }`}>
+                    {passwordRequirements.map((req, idx) => (
+                      <div key={idx} className="flex items-center space-x-2">
+                        <div className={`w-4 h-4 rounded-full flex items-center justify-center ${req.met ? 'bg-green-500' : 'bg-muted'}`}>
                           {req.met && <CheckIcon className="w-3 h-3 text-white" />}
                         </div>
-                        <span className={`text-xs ${
-                          req.met ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'
-                        }`}>
-                          {req.text}
-                        </span>
+                        <span className={`text-xs ${req.met ? 'text-green-600' : 'text-muted-foreground'}`}>{req.text}</span>
                       </div>
                     ))}
                   </div>
-                </motion.div>
+                </div>
               )}
 
-              {/* Submit Button */}
-              <motion.button
-                type="submit"
-                disabled={loading}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-lg transition-colors duration-200 disabled:cursor-not-allowed"
-              >
-                {loading ? (
-                  <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <span>Start Free Trial</span>
-                    <ArrowRightIcon className="w-5 h-5" />
-                  </>
+              <Button type="submit" className="w-full" size="lg" disabled={loading}>
+                {loading ? 'Creating account...' : (
+                  <span className="inline-flex items-center">Start Free Trial <ArrowRightIcon className="ml-2 h-4 w-4" /></span>
                 )}
-              </motion.button>
-            </motion.form>
+              </Button>
+            </form>
 
-            {/* Footer */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.8 }}
-              className="mt-8 text-center"
-            >
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="mt-6 pt-6 border-t text-center">
+              <p className="text-sm text-muted-foreground">
                 Already have an account?{' '}
-                <Link href="/auth/login" className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium">
-                  Sign in
-                </Link>
+                <Link href="/auth/login" className="text-primary hover:underline font-medium">Sign in</Link>
               </p>
-
-              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-xs text-gray-500 dark:text-gray-500">
-                  By signing up, you agree to our Terms of Service and Privacy Policy
-                </p>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Shimmer Effect */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute -top-1/2 -left-1/2 w-full h-full opacity-10 bg-gradient-to-r from-transparent via-white to-transparent transform rotate-45 translate-x-[-100%] animate-shimmer" />
-          </div>
-        </GlassCard>
+            </div>
+          </CardContent>
+        </Card>
       </motion.div>
     </div>
   )

@@ -4,7 +4,7 @@ import { ArrowLeftIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outl
 import { useRouter } from 'next/router'
 import { Conflict } from '../../types/index'
 import { ConflictList } from '../../components/conflicts/ConflictList'
-import { GlassCard } from '../../components/ui/GlassCard'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ThemeToggle } from '../../components/ui/ThemeToggle'
 
 export default function ConflictsPage() {
@@ -63,7 +63,14 @@ export default function ConflictsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <ConflictList onConflictClick={handleConflictClick} />
+          <Card>
+            <CardHeader>
+              <CardTitle>Active Conflicts</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ConflictList onConflictClick={handleConflictClick} />
+            </CardContent>
+          </Card>
         </motion.div>
       </main>
     </div>

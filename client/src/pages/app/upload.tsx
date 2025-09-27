@@ -3,8 +3,8 @@ import { motion } from 'framer-motion'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/router'
 import { FileUpload } from '../../components/upload/FileUpload'
-import { GlassCard } from '../../components/ui/GlassCard'
 import { ThemeToggle } from '../../components/ui/ThemeToggle'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function UploadPage() {
   const router = useRouter()
@@ -56,7 +56,11 @@ export default function UploadPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <FileUpload onUploadComplete={handleUploadComplete} />
+          <Card>
+            <CardContent className="p-0">
+              <FileUpload onUploadComplete={handleUploadComplete} />
+            </CardContent>
+          </Card>
         </motion.div>
 
         {/* Help Section */}
@@ -66,18 +70,15 @@ export default function UploadPage() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="mt-8"
         >
-          <GlassCard>
-            <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Need Help?
-              </h3>
-
+          <Card>
+            <CardHeader>
+              <CardTitle>Need Help?</CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h4 className="font-medium text-gray-900 dark:text-white mb-2">
-                    File Requirements
-                  </h4>
-                  <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                  <h4 className="font-medium mb-2">File Requirements</h4>
+                  <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• Files must contain UPC/barcode data</li>
                     <li>• Include warehouse or location identifiers</li>
                     <li>• CSV files should have headers in the first row</li>
@@ -87,10 +88,8 @@ export default function UploadPage() {
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-gray-900 dark:text-white mb-2">
-                    What Happens Next?
-                  </h4>
-                  <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                  <h4 className="font-medium mb-2">What Happens Next?</h4>
+                  <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• Smart column detection identifies data structure</li>
                     <li>• Files are processed for UPC conflicts</li>
                     <li>• Real-time progress updates via notifications</li>
@@ -102,12 +101,11 @@ export default function UploadPage() {
 
               <div className="mt-6 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
                 <p className="text-sm text-blue-800 dark:text-blue-200">
-                  <strong>Pro Tip:</strong> Our smart column detection works with any warehouse format.
-                  You don't need to format your data - just upload it as-is and we'll handle the rest!
+                  <strong>Pro Tip:</strong> Our smart column detection works with any warehouse format. Upload as-is — we’ll handle the rest!
                 </p>
               </div>
-            </div>
-          </GlassCard>
+            </CardContent>
+          </Card>
         </motion.div>
       </main>
     </div>

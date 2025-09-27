@@ -13,7 +13,10 @@ import {
 import { useRouter } from 'next/router'
 import { useAuth } from '../../hooks/useAuth'
 import { billingApi, organizationApi } from '../../services/api'
-import { GlassCard } from '../../components/ui/GlassCard'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { ThemeToggle } from '../../components/ui/ThemeToggle'
 import { toast } from 'react-hot-toast'
 
@@ -203,8 +206,8 @@ export default function SettingsPage() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
           <div className="lg:w-64 flex-shrink-0">
-            <GlassCard>
-              <div className="p-6">
+            <Card>
+              <CardContent className="p-6">
                 <nav className="space-y-2">
                   {tabs.map((tab) => {
                     const Icon = tab.icon
@@ -228,8 +231,8 @@ export default function SettingsPage() {
                     )
                   })}
                 </nav>
-              </div>
-            </GlassCard>
+              </CardContent>
+            </Card>
 
             {/* Trial Status */}
             {trialStatus.isTrialActive && (
@@ -238,32 +241,25 @@ export default function SettingsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="mt-6"
               >
-                <GlassCard>
-                  <div className="p-6">
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-                      Trial Status
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Trial Status</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
                       {trialStatus.daysLeft} days remaining
                     </p>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={handleUpgrade}
-                      className="w-full py-2 px-4 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
-                    >
-                      Upgrade Now
-                    </motion.button>
-                  </div>
-                </GlassCard>
+                    <Button className="w-full" onClick={handleUpgrade}>Upgrade Now</Button>
+                  </CardContent>
+                </Card>
               </motion.div>
             )}
           </div>
 
           {/* Content */}
           <div className="flex-1">
-            <GlassCard>
-              <div className="p-8">
+            <Card>
+              <CardContent className="p-8">
                 {/* Profile Tab */}
                 {activeTab === 'profile' && (
                   <motion.div
@@ -275,42 +271,15 @@ export default function SettingsPage() {
                     </h2>
                     <form onSubmit={handleProfileUpdate} className="space-y-6">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Full Name
-                        </label>
-                        <input
-                          type="text"
-                          value={profileForm.name}
-                          onChange={(e) => setProfileForm(prev => ({ ...prev, name: e.target.value }))}
-                          className="w-full px-4 py-3 bg-white/50 dark:bg-gray-800/50 border border-white/20 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 dark:text-white"
-                          placeholder="Your full name"
-                        />
+                        <Label className="mb-2 block">Full Name</Label>
+                        <Input value={profileForm.name} onChange={(e) => setProfileForm(prev => ({ ...prev, name: e.target.value }))} placeholder="Your full name" />
                       </div>
-
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Email Address
-                        </label>
-                        <input
-                          type="email"
-                          value={profileForm.email}
-                          disabled
-                          className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-500 dark:text-gray-400 cursor-not-allowed"
-                        />
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                          Email cannot be changed. Contact support if needed.
-                        </p>
+                        <Label className="mb-2 block">Email Address</Label>
+                        <Input value={profileForm.email} disabled />
+                        <p className="text-xs text-muted-foreground mt-1">Email cannot be changed. Contact support if needed.</p>
                       </div>
-
-                      <motion.button
-                        type="submit"
-                        disabled={loading}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="py-3 px-6 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed"
-                      >
-                        {loading ? 'Updating...' : 'Update Profile'}
-                      </motion.button>
+                      <Button type="submit" disabled={loading}>{loading ? 'Updating...' : 'Update Profile'}</Button>
                     </form>
                   </motion.div>
                 )}
@@ -326,53 +295,18 @@ export default function SettingsPage() {
                     </h2>
                     <form onSubmit={handlePasswordChange} className="space-y-6">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Current Password
-                        </label>
-                        <input
-                          type="password"
-                          value={passwordForm.currentPassword}
-                          onChange={(e) => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
-                          className="w-full px-4 py-3 bg-white/50 dark:bg-gray-800/50 border border-white/20 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 dark:text-white"
-                          required
-                        />
+                        <Label className="mb-2 block">Current Password</Label>
+                        <Input type="password" value={passwordForm.currentPassword} onChange={(e) => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))} required />
                       </div>
-
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          New Password
-                        </label>
-                        <input
-                          type="password"
-                          value={passwordForm.newPassword}
-                          onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
-                          className="w-full px-4 py-3 bg-white/50 dark:bg-gray-800/50 border border-white/20 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 dark:text-white"
-                          required
-                        />
+                        <Label className="mb-2 block">New Password</Label>
+                        <Input type="password" value={passwordForm.newPassword} onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))} required />
                       </div>
-
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Confirm New Password
-                        </label>
-                        <input
-                          type="password"
-                          value={passwordForm.confirmPassword}
-                          onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                          className="w-full px-4 py-3 bg-white/50 dark:bg-gray-800/50 border border-white/20 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 dark:text-white"
-                          required
-                        />
+                        <Label className="mb-2 block">Confirm New Password</Label>
+                        <Input type="password" value={passwordForm.confirmPassword} onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))} required />
                       </div>
-
-                      <motion.button
-                        type="submit"
-                        disabled={loading}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="py-3 px-6 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed"
-                      >
-                        {loading ? 'Changing...' : 'Change Password'}
-                      </motion.button>
+                      <Button type="submit" disabled={loading}>{loading ? 'Changing...' : 'Change Password'}</Button>
                     </form>
                   </motion.div>
                 )}
@@ -462,39 +396,14 @@ export default function SettingsPage() {
                     </h2>
                     <form onSubmit={handleOrgUpdate} className="space-y-6">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Organization Name
-                        </label>
-                        <input
-                          type="text"
-                          value={orgForm.name}
-                          onChange={(e) => setOrgForm(prev => ({ ...prev, name: e.target.value }))}
-                          className="w-full px-4 py-3 bg-white/50 dark:bg-gray-800/50 border border-white/20 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 dark:text-white"
-                          placeholder="Organization name"
-                        />
+                        <Label className="mb-2 block">Organization Name</Label>
+                        <Input value={orgForm.name} onChange={(e) => setOrgForm(prev => ({ ...prev, name: e.target.value }))} placeholder="Organization name" />
                       </div>
-
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Organization ID
-                        </label>
-                        <input
-                          type="text"
-                          value={organization?.id || ''}
-                          disabled
-                          className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-500 dark:text-gray-400 cursor-not-allowed"
-                        />
+                        <Label className="mb-2 block">Organization ID</Label>
+                        <Input value={organization?.id || ''} disabled />
                       </div>
-
-                      <motion.button
-                        type="submit"
-                        disabled={loading}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="py-3 px-6 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed"
-                      >
-                        {loading ? 'Updating...' : 'Update Organization'}
-                      </motion.button>
+                      <Button type="submit" disabled={loading}>{loading ? 'Updating...' : 'Update Organization'}</Button>
                     </form>
                   </motion.div>
                 )}
@@ -532,8 +441,8 @@ export default function SettingsPage() {
                     </div>
                   </motion.div>
                 )}
-              </div>
-            </GlassCard>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </main>
