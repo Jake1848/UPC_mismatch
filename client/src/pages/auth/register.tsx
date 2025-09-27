@@ -3,12 +3,11 @@ import { motion } from 'framer-motion'
 import {
   EyeIcon,
   EyeSlashIcon,
-  DocumentChartBarIcon,
   ArrowRightIcon,
   CheckIcon
 } from '@heroicons/react/24/outline'
 import { useAuth } from '../../hooks/useAuth'
-import { Card, CardContent } from '../../components/ui/card'
+import { Card } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
@@ -33,7 +32,6 @@ export default function RegisterPage() {
     e.preventDefault()
     setErrors({})
 
-    // Validation
     const newErrors: Record<string, string> = {}
     if (!formData.email) newErrors.email = 'Email is required'
     if (!formData.password) newErrors.password = 'Password is required'
@@ -44,7 +42,6 @@ export default function RegisterPage() {
     }
     if (!formData.organizationName) newErrors.organizationName = 'Organization name is required'
 
-    // Generate organization slug if not provided
     if (!formData.organizationSlug && formData.organizationName) {
       const slug = formData.organizationName
         .toLowerCase()
@@ -81,7 +78,6 @@ export default function RegisterPage() {
       setErrors(prev => ({ ...prev, [name]: '' }))
     }
 
-    // Auto-generate organization slug
     if (name === 'organizationName') {
       const slug = value
         .toLowerCase()
@@ -100,316 +96,323 @@ export default function RegisterPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-6">
-      {/* Background Effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-1/2 -right-1/2 w-full h-full bg-gradient-radial from-primary-200/30 via-transparent to-transparent dark:from-primary-900/20" />
-        <div className="absolute -bottom-1/2 -left-1/2 w-full h-full bg-gradient-radial from-secondary-200/30 via-transparent to-transparent dark:from-secondary-900/20" />
+    <div className="min-h-screen bg-background flex">
+      {/* Left side - Modern branding section */}
+      <div className="hidden lg:flex lg:flex-1 relative overflow-hidden bg-gradient-to-br from-primary/5 via-primary/10 to-secondary/5">
+        <div className="absolute inset-0 bg-grid-pattern opacity-[0.02]" />
 
-        {/* Floating Elements */}
-        <motion.div
-          animate={{
-            y: [0, -20, 0],
-            rotate: [0, 5, 0]
-          }}
-          transition={{
-            duration: 6,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="absolute top-1/4 left-1/4 w-32 h-32 bg-primary-200/20 dark:bg-primary-800/20 rounded-full blur-xl"
-        />
-        <motion.div
-          animate={{
-            y: [0, 20, 0],
-            rotate: [0, -5, 0]
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-secondary-200/20 dark:bg-secondary-800/20 rounded-full blur-xl"
-        />
-      </div>
+        {/* Floating geometric shapes */}
+        <div className="absolute inset-0">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+            className="absolute top-32 left-16 w-28 h-28 border border-primary/20 rounded-full"
+          />
+          <motion.div
+            animate={{ rotate: -360 }}
+            transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+            className="absolute bottom-40 right-20 w-20 h-20 bg-secondary/10 rounded-2xl"
+          />
+          <motion.div
+            animate={{ y: [-15, 15, -15] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-1/3 left-1/4 w-12 h-12 border-2 border-primary/30 rounded-lg"
+          />
+        </div>
 
-      {/* Theme Toggle */}
-      <div className="absolute top-6 right-6">
-        <ThemeToggle />
-      </div>
-
-      {/* Register Form */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-lg relative z-10"
-      >
-        <Card className="overflow-hidden">
-          <CardContent className="p-8">
-            {/* Logo and Header */}
-            <div className="text-center mb-8">
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="flex items-center justify-center space-x-2 mb-4"
-              >
-                <DocumentChartBarIcon className="w-10 h-10 text-primary-600 dark:text-primary-400" />
-                <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                  UPC Resolver
-                </span>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-              >
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  Start your free trial
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Create your account and organization
-                </p>
-              </motion.div>
+        <div className="relative z-10 flex flex-col justify-center px-12 xl:px-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="mb-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
+                  <div className="w-6 h-6 bg-primary-foreground rounded-sm" />
+                </div>
+                <span className="text-2xl font-bold text-foreground">UPC Resolver</span>
+              </div>
+              <h1 className="text-4xl xl:text-5xl font-bold text-foreground mb-6 leading-tight">
+                Start your free trial today
+              </h1>
+              <p className="text-lg text-muted-foreground max-w-md leading-relaxed">
+                Join 500+ warehouses already using our AI-powered platform to resolve conflicts faster and more accurately.
+              </p>
             </div>
 
-            {/* Form */}
-            <motion.form
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-              onSubmit={handleSubmit}
-              className="space-y-6"
-            >
-              {/* Personal Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="name">
-                    Full Name (Optional)
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-primary rounded-full" />
+                <span className="text-muted-foreground">14-day free trial</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-primary rounded-full" />
+                <span className="text-muted-foreground">No credit card required</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-primary rounded-full" />
+                <span className="text-muted-foreground">Setup in under 5 minutes</span>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Right side - Register form */}
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 lg:max-w-lg xl:max-w-xl">
+        <div className="w-full max-w-md space-y-8">
+          {/* Mobile logo */}
+          <div className="lg:hidden text-center">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+                <div className="w-5 h-5 bg-primary-foreground rounded-sm" />
+              </div>
+              <span className="text-xl font-bold text-foreground">UPC Resolver</span>
+            </div>
+          </div>
+
+          {/* Theme toggle */}
+          <div className="absolute top-6 right-6">
+            <ThemeToggle />
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="space-y-6"
+          >
+            <div className="space-y-2 text-center lg:text-left">
+              <h2 className="text-2xl font-bold text-foreground">Create your account</h2>
+              <p className="text-muted-foreground">
+                Get started with your free trial
+              </p>
+            </div>
+
+            <Card className="p-6 border-0 shadow-xl bg-card/50 backdrop-blur-sm">
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-sm font-medium">
+                      Full Name <span className="text-muted-foreground">(Optional)</span>
+                    </Label>
+                    <Input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder="Your name"
+                      disabled={loading}
+                      className="h-11"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-sm font-medium">
+                      Email <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="work@company.com"
+                      disabled={loading}
+                      className={`h-11 ${errors.email ? 'border-destructive focus-visible:ring-destructive' : ''}`}
+                    />
+                    {errors.email && (
+                      <motion.p
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-xs text-destructive"
+                      >
+                        {errors.email}
+                      </motion.p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="organizationName" className="text-sm font-medium">
+                    Organization Name <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
+                    id="organizationName"
+                    name="organizationName"
+                    value={formData.organizationName}
                     onChange={handleChange}
-                    placeholder="Your name"
+                    placeholder="Your company name"
                     disabled={loading}
+                    className={`h-11 ${errors.organizationName ? 'border-destructive focus-visible:ring-destructive' : ''}`}
                   />
-                </div>
-
-                <div>
-                  <Label htmlFor="email">
-                    Email Address *
-                  </Label>
-                  <Input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="work@company.com"
-                    disabled={loading}
-                    className={errors.email ? 'border-destructive' : ''}
-                  />
-                  {errors.email && (
+                  {errors.organizationName && (
                     <motion.p
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="mt-1 text-sm text-red-600 dark:text-red-400"
+                      className="text-xs text-destructive"
                     >
-                      {errors.email}
+                      {errors.organizationName}
                     </motion.p>
                   )}
                 </div>
-              </div>
 
-              {/* Organization Information */}
-              <div>
-                <Label htmlFor="organizationName">
-                  Organization Name *
-                </Label>
-                <Input
-                  type="text"
-                  id="organizationName"
-                  name="organizationName"
-                  value={formData.organizationName}
-                  onChange={handleChange}
-                  placeholder="Your company name"
-                  disabled={loading}
-                  className={errors.organizationName ? 'border-destructive' : ''}
-                />
-                {errors.organizationName && (
-                  <motion.p
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-1 text-sm text-red-600 dark:text-red-400"
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-sm font-medium">
+                      Password <span className="text-destructive">*</span>
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? 'text' : 'password'}
+                        id="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        placeholder="Create password"
+                        disabled={loading}
+                        className={`h-11 pr-11 ${errors.password ? 'border-destructive focus-visible:ring-destructive' : ''}`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {showPassword ? (
+                          <EyeSlashIcon className="w-4 h-4" />
+                        ) : (
+                          <EyeIcon className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+                    {errors.password && (
+                      <motion.p
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-xs text-destructive"
+                      >
+                        {errors.password}
+                      </motion.p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword" className="text-sm font-medium">
+                      Confirm Password <span className="text-destructive">*</span>
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        placeholder="Confirm password"
+                        disabled={loading}
+                        className={`h-11 pr-11 ${errors.confirmPassword ? 'border-destructive focus-visible:ring-destructive' : ''}`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {showConfirmPassword ? (
+                          <EyeSlashIcon className="w-4 h-4" />
+                        ) : (
+                          <EyeIcon className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+                    {errors.confirmPassword && (
+                      <motion.p
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-xs text-destructive"
+                      >
+                        {errors.confirmPassword}
+                      </motion.p>
+                    )}
+                  </div>
+                </div>
+
+                {formData.password && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    className="p-4 bg-muted/50 rounded-lg border"
                   >
-                    {errors.organizationName}
-                  </motion.p>
-                )}
-              </div>
-
-              {/* Password Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="password">
-                    Password *
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      type={showPassword ? 'text' : 'password'}
-                      id="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      placeholder="Create password"
-                      disabled={loading}
-                      className={`pr-12 ${errors.password ? 'border-destructive' : ''}`}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                    >
-                      {showPassword ? (
-                        <EyeSlashIcon className="w-5 h-5" />
-                      ) : (
-                        <EyeIcon className="w-5 h-5" />
-                      )}
-                    </button>
-                  </div>
-                  {errors.password && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mt-1 text-sm text-red-600 dark:text-red-400"
-                    >
-                      {errors.password}
-                    </motion.p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="confirmPassword">
-                    Confirm Password *
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      placeholder="Confirm password"
-                      disabled={loading}
-                      className={`pr-12 ${errors.confirmPassword ? 'border-destructive' : ''}`}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                    >
-                      {showConfirmPassword ? (
-                        <EyeSlashIcon className="w-5 h-5" />
-                      ) : (
-                        <EyeIcon className="w-5 h-5" />
-                      )}
-                    </button>
-                  </div>
-                  {errors.confirmPassword && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mt-1 text-sm text-red-600 dark:text-red-400"
-                    >
-                      {errors.confirmPassword}
-                    </motion.p>
-                  )}
-                </div>
-              </div>
-
-              {/* Password Requirements */}
-              {formData.password && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="p-3 bg-gray-50 dark:bg-gray-800/30 rounded-lg"
-                >
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Password Requirements:
-                  </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {passwordRequirements.map((req, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                          req.met ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'
-                        }`}>
-                          {req.met && <CheckIcon className="w-3 h-3 text-white" />}
+                    <p className="text-sm font-medium text-foreground mb-3">
+                      Password Requirements:
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {passwordRequirements.map((req, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <div className={`w-4 h-4 rounded-full flex items-center justify-center transition-colors ${
+                            req.met ? 'bg-primary text-primary-foreground' : 'bg-muted border'
+                          }`}>
+                            {req.met && <CheckIcon className="w-2.5 h-2.5" />}
+                          </div>
+                          <span className={`text-xs transition-colors ${
+                            req.met ? 'text-primary font-medium' : 'text-muted-foreground'
+                          }`}>
+                            {req.text}
+                          </span>
                         </div>
-                        <span className={`text-xs ${
-                          req.met ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'
-                        }`}>
-                          {req.text}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
 
-              {/* Submit Button */}
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
+                <div className="text-xs text-muted-foreground">
+                  <label className="flex items-start gap-2 cursor-pointer">
+                    <input type="checkbox" className="mt-0.5 rounded border-input" required />
+                    <span>
+                      I agree to the{' '}
+                      <Link href="#" className="text-primary hover:text-primary/80 font-medium">
+                        Terms of Service
+                      </Link>{' '}
+                      and{' '}
+                      <Link href="#" className="text-primary hover:text-primary/80 font-medium">
+                        Privacy Policy
+                      </Link>
+                    </span>
+                  </label>
+                </div>
+
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full flex items-center justify-center space-x-2"
+                  className="w-full h-12 text-base font-medium"
                 >
-                {loading ? (
-                  <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <span>Start Free Trial</span>
-                    <ArrowRightIcon className="w-5 h-5" />
-                  </>
-                )}
+                  {loading ? (
+                    <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      Start Free Trial
+                      <ArrowRightIcon className="w-4 h-4 ml-2" />
+                    </>
+                  )}
                 </Button>
-              </motion.div>
-            </motion.form>
+              </form>
+            </Card>
 
-            {/* Footer */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.8 }}
-              className="mt-8 text-center"
-            >
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground">
                 Already have an account?{' '}
-                <Link href="/auth/login" className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium">
+                <Link
+                  href="/auth/login"
+                  className="text-primary hover:text-primary/80 font-medium transition-colors"
+                >
                   Sign in
                 </Link>
               </p>
-
-              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-xs text-gray-500 dark:text-gray-500">
-                  By signing up, you agree to our Terms of Service and Privacy Policy
-                </p>
-              </div>
-            </motion.div>
-          </CardContent>
-
-          {/* Shimmer Effect */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute inset-0 opacity-5 bg-gradient-to-r from-transparent via-white to-transparent transform translate-x-[-100%] animate-shimmer" />
-          </div>
-        </Card>
-      </motion.div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
     </div>
   )
 }

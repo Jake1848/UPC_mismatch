@@ -3,20 +3,17 @@ import { motion } from 'framer-motion'
 import {
   EyeIcon,
   EyeSlashIcon,
-  DocumentChartBarIcon,
   ArrowRightIcon
 } from '@heroicons/react/24/outline'
 import { useAuth } from '../../hooks/useAuth'
-import { Card, CardContent } from '../../components/ui/card'
+import { Card } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { ThemeToggle } from '../../components/ui/ThemeToggle'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 
 export default function LoginPage() {
-  const router = useRouter()
   const { login, loading } = useAuth()
   const [formData, setFormData] = useState({
     email: '',
@@ -29,7 +26,6 @@ export default function LoginPage() {
     e.preventDefault()
     setErrors({})
 
-    // Validation
     const newErrors: Record<string, string> = {}
     if (!formData.email) newErrors.email = 'Email is required'
     if (!formData.password) newErrors.password = 'Password is required'
@@ -57,204 +53,207 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-6">
-      {/* Background Effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-1/2 -right-1/2 w-full h-full bg-gradient-radial from-primary-200/30 via-transparent to-transparent dark:from-primary-900/20" />
-        <div className="absolute -bottom-1/2 -left-1/2 w-full h-full bg-gradient-radial from-secondary-200/30 via-transparent to-transparent dark:from-secondary-900/20" />
+    <div className="min-h-screen bg-background flex">
+      {/* Left side - Modern branding section */}
+      <div className="hidden lg:flex lg:flex-1 relative overflow-hidden bg-gradient-to-br from-primary/5 via-primary/10 to-secondary/5">
+        <div className="absolute inset-0 bg-grid-pattern opacity-[0.02]" />
 
-        {/* Floating Elements */}
-        <motion.div
-          animate={{
-            y: [0, -20, 0],
-            rotate: [0, 5, 0]
-          }}
-          transition={{
-            duration: 6,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="absolute top-1/4 left-1/4 w-32 h-32 bg-primary-200/20 dark:bg-primary-800/20 rounded-full blur-xl"
-        />
-        <motion.div
-          animate={{
-            y: [0, 20, 0],
-            rotate: [0, -5, 0]
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-secondary-200/20 dark:bg-secondary-800/20 rounded-full blur-xl"
-        />
-      </div>
+        {/* Floating geometric shapes */}
+        <div className="absolute inset-0">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            className="absolute top-20 left-20 w-32 h-32 border border-primary/20 rounded-2xl"
+          />
+          <motion.div
+            animate={{ rotate: -360 }}
+            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+            className="absolute bottom-32 right-32 w-24 h-24 bg-primary/10 rounded-full"
+          />
+          <motion.div
+            animate={{ y: [-10, 10, -10] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-1/2 left-1/3 w-16 h-16 border-2 border-secondary/30 rounded-lg"
+          />
+        </div>
 
-      {/* Theme Toggle */}
-      <div className="absolute top-6 right-6">
-        <ThemeToggle />
-      </div>
-
-      {/* Login Form */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md relative z-10"
-      >
-        <Card className="overflow-hidden">
-          <CardContent className="p-8">
-            {/* Logo and Header */}
-            <div className="text-center mb-8">
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="flex items-center justify-center space-x-2 mb-4"
-              >
-                <DocumentChartBarIcon className="w-10 h-10 text-primary-600 dark:text-primary-400" />
-                <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                  UPC Resolver
-                </span>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-              >
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  Welcome back
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Sign in to your warehouse analytics platform
-                </p>
-              </motion.div>
+        <div className="relative z-10 flex flex-col justify-center px-12 xl:px-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="mb-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
+                  <div className="w-6 h-6 bg-primary-foreground rounded-sm" />
+                </div>
+                <span className="text-2xl font-bold text-foreground">UPC Resolver</span>
+              </div>
+              <h1 className="text-4xl xl:text-5xl font-bold text-foreground mb-6 leading-tight">
+                Intelligent conflict resolution for modern warehouses
+              </h1>
+              <p className="text-lg text-muted-foreground max-w-md leading-relaxed">
+                Streamline your UPC management with AI-powered conflict detection and resolution.
+                Trusted by 500+ warehouses worldwide.
+              </p>
             </div>
 
-            {/* Form */}
-            <motion.form
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-              onSubmit={handleSubmit}
-              className="space-y-6"
-            >
-              {/* Email Field */}
-              <div>
-                <Label htmlFor="email">
-                  Email Address
-                </Label>
-                <Input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Enter your email"
-                  disabled={loading}
-                  className={errors.email ? 'border-destructive' : ''}
-                />
-                {errors.email && (
-                  <motion.p
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-1 text-sm text-red-600 dark:text-red-400"
-                  >
-                    {errors.email}
-                  </motion.p>
-                )}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-primary rounded-full" />
+                <span className="text-muted-foreground">Real-time conflict detection</span>
               </div>
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-primary rounded-full" />
+                <span className="text-muted-foreground">AI-powered resolution suggestions</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-primary rounded-full" />
+                <span className="text-muted-foreground">Enterprise-grade security</span>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
 
-              {/* Password Field */}
-              <div>
-                <Label htmlFor="password">
-                  Password
-                </Label>
-                <div className="relative">
+      {/* Right side - Login form */}
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 lg:max-w-md xl:max-w-lg">
+        <div className="w-full max-w-sm space-y-8">
+          {/* Mobile logo */}
+          <div className="lg:hidden text-center">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+                <div className="w-5 h-5 bg-primary-foreground rounded-sm" />
+              </div>
+              <span className="text-xl font-bold text-foreground">UPC Resolver</span>
+            </div>
+          </div>
+
+          {/* Theme toggle */}
+          <div className="absolute top-6 right-6">
+            <ThemeToggle />
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="space-y-6"
+          >
+            <div className="space-y-2 text-center lg:text-left">
+              <h2 className="text-2xl font-bold text-foreground">Welcome back</h2>
+              <p className="text-muted-foreground">
+                Sign in to your account to continue
+              </p>
+            </div>
+
+            <Card className="p-6 border-0 shadow-xl bg-card/50 backdrop-blur-sm">
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm font-medium">
+                    Email
+                  </Label>
                   <Input
-                    type={showPassword ? 'text' : 'password'}
-                    id="password"
-                    name="password"
-                    value={formData.password}
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
                     onChange={handleChange}
-                    placeholder="Enter your password"
+                    placeholder="Enter your email"
                     disabled={loading}
-                    className={`pr-12 ${errors.password ? 'border-destructive' : ''}`}
+                    className={`h-12 ${errors.email ? 'border-destructive focus-visible:ring-destructive' : ''}`}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                  >
-                    {showPassword ? (
-                      <EyeSlashIcon className="w-5 h-5" />
-                    ) : (
-                      <EyeIcon className="w-5 h-5" />
-                    )}
-                  </button>
+                  {errors.email && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-sm text-destructive"
+                    >
+                      {errors.email}
+                    </motion.p>
+                  )}
                 </div>
-                {errors.password && (
-                  <motion.p
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-1 text-sm text-red-600 dark:text-red-400"
-                  >
-                    {errors.password}
-                  </motion.p>
-                )}
-              </div>
 
-              {/* Submit Button */}
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-sm font-medium">
+                    Password
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? 'text' : 'password'}
+                      id="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="Enter your password"
+                      disabled={loading}
+                      className={`h-12 pr-12 ${errors.password ? 'border-destructive focus-visible:ring-destructive' : ''}`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeSlashIcon className="w-5 h-5" />
+                      ) : (
+                        <EyeIcon className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                  {errors.password && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-sm text-destructive"
+                    >
+                      {errors.password}
+                    </motion.p>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between text-sm">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" className="rounded border-input" />
+                    <span className="text-muted-foreground">Remember me</span>
+                  </label>
+                  <Link href="#" className="text-primary hover:text-primary/80 font-medium">
+                    Forgot password?
+                  </Link>
+                </div>
+
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full flex items-center justify-center space-x-2"
+                  className="w-full h-12 text-base font-medium"
                 >
-                {loading ? (
-                  <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <span>Sign In</span>
-                    <ArrowRightIcon className="w-5 h-5" />
-                  </>
-                )}
+                  {loading ? (
+                    <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      Sign in
+                      <ArrowRightIcon className="w-4 h-4 ml-2" />
+                    </>
+                  )}
                 </Button>
-              </motion.div>
-            </motion.form>
+              </form>
+            </Card>
 
-            {/* Footer */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.8 }}
-              className="mt-8 text-center"
-            >
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground">
                 Don't have an account?{' '}
-                <Link href="/auth/register" className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium">
+                <Link
+                  href="/auth/register"
+                  className="text-primary hover:text-primary/80 font-medium transition-colors"
+                >
                   Sign up for free
                 </Link>
               </p>
-
-              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-xs text-gray-500 dark:text-gray-500">
-                  Trusted by warehouses worldwide for UPC conflict resolution
-                </p>
-              </div>
-            </motion.div>
-          </CardContent>
-
-          {/* Shimmer Effect */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute inset-0 opacity-5 bg-gradient-to-r from-transparent via-white to-transparent transform translate-x-[-100%] animate-shimmer" />
-          </div>
-        </Card>
-      </motion.div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
     </div>
   )
 }
