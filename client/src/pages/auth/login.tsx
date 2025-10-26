@@ -5,7 +5,8 @@ import {
   EyeSlashIcon,
   ArrowRightIcon
 } from '@heroicons/react/24/outline'
-import { useAuth } from '../../hooks/useAuth'
+// import { useAuth } from '../../hooks/useAuth'
+import { useRouter } from 'next/router'
 import { Card } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
@@ -14,7 +15,9 @@ import { ThemeToggle } from '../../components/ui/ThemeToggle'
 import Link from 'next/link'
 
 export default function LoginPage() {
-  const { login, loading } = useAuth()
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+  // const { login, loading } = useAuth()
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -36,8 +39,15 @@ export default function LoginPage() {
     }
 
     try {
-      await login(formData)
+      setLoading(true)
+      // Simulate login for demo purposes
+      setTimeout(() => {
+        router.push('/app/enhanced-dashboard')
+        setLoading(false)
+      }, 1000)
+      // await login(formData)
     } catch (error: any) {
+      setLoading(false)
       if (error.response?.data?.field) {
         setErrors({ [error.response.data.field]: error.response.data.message })
       }

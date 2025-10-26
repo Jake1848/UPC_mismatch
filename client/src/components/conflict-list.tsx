@@ -8,8 +8,7 @@ import { conflictsApi } from "../services/api"
 import { useWebSocket } from "../services/websocket"
 import type { Conflict } from "../types/index"
 import { ConflictCard } from "./conflict-card"
-// Inline glass card styling to avoid import issues
-import { toast } from "./ui/use-toast"
+import { toast } from "sonner"
 
 interface ConflictListProps {
   analysisId?: string

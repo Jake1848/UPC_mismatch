@@ -11,8 +11,8 @@ import { conflictsApi } from '../../services/api'
 import { useWebSocket } from '../../services/websocket'
 import { Conflict, User } from '../../types/index'
 import { ConflictCard } from './ConflictCard'
-import { GlassCard } from '../ui/GlassCard'
-import { toast } from '../ui/use-toast'
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
+import { toast } from 'sonner'
 
 interface ConflictListProps {
   analysisId?: string
@@ -163,8 +163,8 @@ export const ConflictList: React.FC<ConflictListProps> = ({
     <div className="space-y-6">
       {/* Filters and Controls */}
       {showFilters && (
-        <GlassCard>
-          <div className="p-6">
+        <Card>
+          <CardContent className="p-6">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
               {/* Search */}
               <div className="relative flex-1 max-w-md">
@@ -244,8 +244,8 @@ export const ConflictList: React.FC<ConflictListProps> = ({
                 </div>
               </motion.div>
             )}
-          </div>
-        </GlassCard>
+          </CardContent>
+        </Card>
       )}
 
       {/* Conflicts List */}
@@ -275,7 +275,7 @@ export const ConflictList: React.FC<ConflictListProps> = ({
         {loading && (
           <div className="space-y-4">
             {[...Array(5)].map((_, i) => (
-              <GlassCard key={i}>
+              <Card key={i}>
                 <div className="p-6 animate-pulse">
                   <div className="flex items-start space-x-4">
                     <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded" />
@@ -286,15 +286,15 @@ export const ConflictList: React.FC<ConflictListProps> = ({
                     <div className="w-16 h-6 bg-gray-200 dark:bg-gray-700 rounded" />
                   </div>
                 </div>
-              </GlassCard>
+              </Card>
             ))}
           </div>
         )}
 
         {/* Empty State */}
         {!loading && conflicts.length === 0 && (
-          <GlassCard>
-            <div className="p-12 text-center">
+          <Card>
+            <CardContent className="p-12 text-center">
               <CheckIcon className="w-16 h-16 text-green-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                 No conflicts found
@@ -305,8 +305,8 @@ export const ConflictList: React.FC<ConflictListProps> = ({
                   : 'Great! No conflicts detected in your data.'
                 }
               </p>
-            </div>
-          </GlassCard>
+            </CardContent>
+          </Card>
         )}
 
         {/* Conflicts */}

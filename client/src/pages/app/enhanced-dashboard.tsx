@@ -15,10 +15,10 @@ import {
   UserCircleIcon,
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline'
-import { useAuth } from '../../hooks/useAuth'
-import { useWebSocket } from '../../services/websocket'
-import { analysisApi, conflictsApi } from '../../services/api'
-import { toast } from '../../components/ui/use-toast'
+// import { useAuth } from '../../hooks/useAuth'
+// import { useWebSocket } from '../../services/websocket'
+// import { analysisApi, conflictsApi } from '../../services/api'
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 
@@ -71,16 +71,19 @@ const quickActions = [
 ]
 
 export default function EnhancedDashboard() {
-  const { user } = useAuth()
+  // const { user } = useAuth()
+  // Mock user for demo
+  const user = { name: 'Demo User', email: 'demo@example.com' }
+
   const [stats, setStats] = useState<DashboardStats>({
-    totalAnalyses: 0,
-    totalConflicts: 0,
-    pendingConflicts: 0,
-    resolvedConflicts: 0,
-    totalRows: 0,
-    avgProcessingTime: 0,
+    totalAnalyses: 47,
+    totalConflicts: 1284,
+    pendingConflicts: 23,
+    resolvedConflicts: 1261,
+    totalRows: 2847392,
+    avgProcessingTime: 2.4,
     aiAccuracy: 94.5,
-    fraudDetected: 0
+    fraudDetected: 12
   })
   const [recentActivity, setRecentActivity] = useState([])
   const [showUploadModal, setShowUploadModal] = useState(false)
@@ -91,21 +94,34 @@ export default function EnhancedDashboard() {
 
   const loadDashboardData = async () => {
     try {
-      const [analyses, conflicts] = await Promise.all([
+      // Mock data loading for demo
+      setTimeout(() => {
+        setStats(prev => ({
+          ...prev,
+          totalAnalyses: 47,
+          totalConflicts: 1284,
+          pendingConflicts: 23,
+          resolvedConflicts: 1261,
+          totalRows: 2847392,
+          avgProcessingTime: 2.4,
+        }))
+      }, 1000)
+
+      /* const [analyses, conflicts] = await Promise.all([
         analysisApi.getAll(),
         conflictsApi.getAll()
       ])
 
-      setStats({
-        totalAnalyses: analyses.data?.total || 0,
-        totalConflicts: conflicts.data?.total || 0,
-        pendingConflicts: conflicts.data?.pending || 0,
-        resolvedConflicts: conflicts.data?.resolved || 0,
-        totalRows: analyses.data?.totalRows || 0,
-        avgProcessingTime: analyses.data?.avgTime || 0,
-        aiAccuracy: 94.5,
-        fraudDetected: conflicts.data?.fraudulent || 0
-      })
+      // setStats({
+        // totalAnalyses: analyses.data?.total || 0,
+        // totalConflicts: conflicts.data?.total || 0,
+        // pendingConflicts: conflicts.data?.pending || 0,
+        // resolvedConflicts: conflicts.data?.resolved || 0,
+        // totalRows: analyses.data?.totalRows || 0,
+        // avgProcessingTime: analyses.data?.avgTime || 0,
+        // aiAccuracy: 94.5,
+        // fraudDetected: conflicts.data?.fraudulent || 0
+      // }) */
     } catch (error) {
       console.error('Failed to load dashboard data:', error)
     }

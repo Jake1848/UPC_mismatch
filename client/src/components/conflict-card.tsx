@@ -12,8 +12,8 @@ import {
   CurrencyDollarIcon,
 } from "@heroicons/react/24/outline"
 import type { Conflict } from "../types/index"
-// Inline glass card styling to avoid import issues
 import { formatDistanceToNow } from "date-fns"
+import { Card } from "./ui/card"
 
 interface ConflictCardProps {
   conflict: Conflict
@@ -88,9 +88,9 @@ export const ConflictCard: React.FC<ConflictCardProps> = ({
   }
 
   return (
-    <div
+    <Card
       onClick={onClick}
-      className={`${compact ? "p-4" : "p-6"} cursor-pointer relative backdrop-blur-xl bg-white/25 dark:bg-gray-800/25 border border-white/20 dark:border-white/10 rounded-xl shadow-xl overflow-hidden transition-all duration-300 ease-out hover:shadow-2xl hover:-translate-y-1 hover:bg-white/30 dark:hover:bg-gray-800/30`}
+      className={`${compact ? "p-4" : "p-6"} cursor-pointer transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1`}
     >
       <div className="space-y-4">
         {/* Header */}
@@ -173,6 +173,6 @@ export const ConflictCard: React.FC<ConflictCardProps> = ({
           </div>
         )}
       </div>
-    </div>
+    </Card>
   )
 }

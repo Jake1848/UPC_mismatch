@@ -2,7 +2,7 @@ import type { AppProps } from 'next/app'
 import { useRouter } from 'next/router'
 import { Toaster } from '../components/ui/toaster'
 import { ThemeProvider } from 'next-themes'
-import { AuthProvider } from '../contexts/AuthContext'
+// import { AuthProvider } from '../contexts/AuthContext'
 import { AppLayout } from '../components/layout/AppLayout'
 import '../styles/globals.css'
 
@@ -14,7 +14,6 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
-      <AuthProvider>
         <div className="min-h-screen bg-background text-foreground">
           {isPublicRoute ? (
             <Component {...pageProps} />
@@ -26,7 +25,6 @@ export default function App({ Component, pageProps }: AppProps) {
 
           <Toaster />
         </div>
-      </AuthProvider>
     </ThemeProvider>
   )
 }

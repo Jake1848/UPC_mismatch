@@ -15,7 +15,7 @@ import {
   BellIcon,
   UserCircleIcon
 } from '@heroicons/react/24/outline'
-import { useAuth } from '../../hooks/useAuth'
+// import { useAuth } from '../../hooks/useAuth'
 import { ThemeToggle } from '../ui/ThemeToggle'
 import { Input } from '@/components/ui/input'
 
@@ -35,7 +35,11 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const router = useRouter()
-  const { user, logout } = useAuth()
+  // const { user, logout } = useAuth()
+
+  // Mock user for demo
+  const user = { name: 'Demo User', email: 'demo@example.com' }
+  const logout = () => router.push('/auth/login')
 
   return (
     <div className="min-h-screen bg-background">

@@ -11,8 +11,8 @@ import {
 import { useDropzone } from 'react-dropzone'
 import { analysisApi } from '../../services/api'
 import { useWebSocket } from '../../services/websocket'
-import { toast } from '../ui/use-toast'
-import { GlassCard } from '../ui/GlassCard'
+import { toast } from 'sonner'
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 
 interface FileUploadProps {
   onUploadComplete?: (analysisId: string) => void
@@ -177,7 +177,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   return (
     <div className="space-y-6">
       {/* Upload Area */}
-      <GlassCard className="overflow-hidden">
+      <Card className="overflow-hidden border-dashed">
         <motion.div
           {...(getRootProps() as any)}
           className={`
@@ -236,7 +236,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
             )}
           </AnimatePresence>
         </motion.div>
-      </GlassCard>
+      </Card>
 
       {/* Upload Progress */}
       <AnimatePresence>
@@ -246,11 +246,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
           >
-            <GlassCard>
-              <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  Upload Progress
-                </h3>
+            <Card>
+              <CardHeader>
+                <CardTitle>Upload Progress</CardTitle>
+              </CardHeader>
+              <CardContent>
 
                 <div className="space-y-4">
                   {uploads.map((upload, index) => (
@@ -318,18 +318,18 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                     </motion.div>
                   ))}
                 </div>
-              </div>
-            </GlassCard>
+              </CardContent>
+            </Card>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Smart Column Detection Info */}
-      <GlassCard>
-        <div className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-            Smart Column Detection
-          </h3>
+      <Card>
+        <CardHeader>
+          <CardTitle>Smart Column Detection</CardTitle>
+        </CardHeader>
+        <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-400">
             <div>
               <h4 className="font-medium text-gray-900 dark:text-white mb-2">
@@ -354,8 +354,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
               </ul>
             </div>
           </div>
-        </div>
-      </GlassCard>
+        </CardContent>
+      </Card>
     </div>
   )
 }
