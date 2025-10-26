@@ -1,0 +1,135 @@
+// This is your Prisma schema file
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String   @id @default(uuid())
+  email          String   @unique
+  name           String
+  password       String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  role           UserRole @default(USER)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  analyses       Analysis[]
+  conflicts      Conflict[] @relation("AssignedConflicts")
+  @@map("users")
+}
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  plan      Plan     @default(FREE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+  analyses  Analysis[]
+  @@map("organizations")
+}
+
+model Analysis {
+  id               String         @id @default(uuid())
+  fileName         String
+  fileSize         Int
+  totalRows        Int            @default(0)
+  processedRows    Int            @default(0)
+  conflictsFound   Int            @default(0)
+  lowSeverity      Int            @default(0)
+  mediumSeverity   Int            @default(0)
+  highSeverity     Int            @default(0)
+  criticalSeverity Int            @default(0)
+  status           AnalysisStatus @default(PENDING)
+  processedAt      DateTime?
+  userId           String
+  user             User           @relation(fields: [userId], references: [id])
+  organizationId   String
+  organization     Organization   @relation(fields: [organizationId], references: [id])
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  conflicts        Conflict[]
+  @@map("analyses")
+  @@index([organizationId])
+  @@index([userId])
+  @@index([status])
+}
+
+model Conflict {
+  id              String         @id @default(uuid())
+  upc             String
+  type            ConflictType
+  severity        Severity
+  description     String
+  suggestedFix    String?
+  relatedRows     Int[]
+  status          ConflictStatus @default(PENDING)
+  assignedToId    String?
+  assignedTo      User?          @relation("AssignedConflicts", fields: [assignedToId], references: [id])
+  analysisId      String
+  analysis        Analysis       @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  organizationId  String
+  resolutionNotes String?
+  resolvedAt      DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@map("conflicts")
+  @@index([analysisId])
+  @@index([organizationId])
+  @@index([status])
+  @@index([severity])
+  @@index([assignedToId])
+}
+
+enum UserRole {
+  ADMIN
+  USER
+  ANALYST
+}
+
+enum Plan {
+  FREE
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum AnalysisStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum ConflictType {
+  DUPLICATE_UPC
+  INVALID_FORMAT
+  MISSING_DATA
+  PRICE_MISMATCH
+  QUANTITY_MISMATCH
+  LOCATION_CONFLICT
+}
+
+enum ConflictStatus {
+  PENDING
+  IN_PROGRESS
+  RESOLVED
+  IGNORED
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}

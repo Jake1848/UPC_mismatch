@@ -1,8 +1,15 @@
-# UPC Conflict Resolver 🚀
+# 🏢 UPC Conflict Resolver - Enterprise Edition
 
-**Enterprise-grade SaaS solution for detecting and resolving UPC/SKU conflicts in warehouse management systems.**
+> **Enterprise-grade UPC conflict detection and resolution platform**
+>
+> Built with Next.js 14, Express, PostgreSQL, and TypeScript
 
-*Transform your warehouse operations with intelligent UPC conflict detection and resolution workflows.*
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-14.2-black)](https://nextjs.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)](https://www.postgresql.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-5.20-2D3748)](https://www.prisma.io/)
+
+A modern, data-focused dashboard for detecting, analyzing, and resolving UPC (Universal Product Code) conflicts across large datasets. Designed for enterprise warehouse management, inventory control, and supply chain operations.
 
 ## 💰 Pricing
 - **Starter**: $599/month - Up to 100K products, 3 team members
