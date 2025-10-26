@@ -49,6 +49,7 @@ export default function AnalysisDetailPage() {
 
   useEffect(() => {
     fetchAnalysis()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [analysisId])
 
   const fetchAnalysis = async () => {
@@ -124,7 +125,7 @@ export default function AnalysisDetailPage() {
         <div className="text-center">
           <AlertCircle className="w-16 h-16 text-slate-600 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-2">Analysis Not Found</h2>
-          <p className="text-slate-400 mb-6">This analysis may have been deleted or you don't have access to it.</p>
+          <p className="text-slate-400 mb-6">This analysis may have been deleted or you don&apos;t have access to it.</p>
           <button
             onClick={() => router.push('/dashboard')}
             className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition"

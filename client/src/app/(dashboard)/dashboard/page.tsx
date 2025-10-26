@@ -12,7 +12,8 @@ import {
   ArrowRight,
   CheckCircle,
   XCircle,
-  Clock
+  Clock,
+  AlertTriangle
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -60,6 +61,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchDashboardData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router])
 
   const fetchDashboardData = async () => {

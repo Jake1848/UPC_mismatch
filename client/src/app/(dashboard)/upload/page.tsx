@@ -36,6 +36,7 @@ export default function UploadPage() {
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleFiles(Array.from(e.dataTransfer.files))
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

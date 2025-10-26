@@ -69,6 +69,7 @@ export default function ConflictsPage() {
 
   useEffect(() => {
     fetchConflicts()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, search, selectedSeverities, selectedTypes, selectedStatuses])
 
   const fetchConflicts = async () => {
