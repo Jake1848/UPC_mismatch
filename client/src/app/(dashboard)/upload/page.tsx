@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Upload, FileSpreadsheet, X, CheckCircle, AlertCircle, Play } from 'lucide-react'
 import Papa from 'papaparse'
+import * as XLSX from 'xlsx'
 import { AnimatedButton } from '@/components/ui/animated-button'
 import { AnimatedCard } from '@/components/ui/animated-card'
 
@@ -79,13 +80,15 @@ export default function UploadPage() {
     console.log('📤 [UPLOAD PAGE] Processing files:', files.map(f => f.name))
     const validFiles = files.filter(file => {
       const extension = file.name.split('.').pop()?.toLowerCase()
-      return extension === 'csv'
+      return extension === 'csv' || extension === 'xlsx' || extension === 'xls'
     })
 
     if (validFiles.length === 0) {
-      alert('Please upload CSV files only (Excel coming soon!)')
+      alert('Please upload CSV or Excel files (.csv, .xlsx, .xls)')
       return
     }
+
+    console.log('📤 [UPLOAD PAGE] Valid files:', validFiles.length)
 
     for (const file of validFiles) {
       const fileId = Math.random().toString(36).substring(7)
@@ -96,18 +99,23 @@ export default function UploadPage() {
         progress: 0
       }
 
+      console.log('📤 [UPLOAD PAGE] Adding file:', file.name, 'ID:', fileId)
       setUploadedFiles(prev => [...prev, uploadedFile])
     }
   }
 
   const processFile = async (fileId: string) => {
     const fileObj = uploadedFiles.find(f => f.id === fileId)
-    if (!fileObj) return
+    if (!fileObj) {
+      console.error('📤 [UPLOAD PAGE] File not found:', fileId)
+      return
+    }
 
     console.log('═══════════════════════════════════════════════════')
     console.log('📤 [UPLOAD PAGE] ======= PROCESSING FILE =======')
     console.log('📤 [UPLOAD PAGE] File:', fileObj.file.name)
     console.log('📤 [UPLOAD PAGE] Size:', (fileObj.file.size / 1024).toFixed(2), 'KB')
+    console.log('📤 [UPLOAD PAGE] Type:', fileObj.file.type)
     console.log('═══════════════════════════════════════════════════')
 
     setUploadedFiles(prev => prev.map(f =>
@@ -115,69 +123,112 @@ export default function UploadPage() {
     ))
 
     try {
-      // Parse CSV
-      Papa.parse(fileObj.file, {
-        header: true,
-        skipEmptyLines: true,
-        complete: (results) => {
-          console.log('📤 [UPLOAD PAGE] CSV parsed:', results.data.length, 'rows')
+      const extension = fileObj.file.name.split('.').pop()?.toLowerCase()
 
-          setUploadedFiles(prev => prev.map(f =>
-            f.id === fileId ? { ...f, progress: 40 } : f
-          ))
-
-          // Detect conflicts
-          const conflicts = detectConflicts(results.data as UPCRow[])
-          console.log('📤 [UPLOAD PAGE] Conflicts detected:', conflicts.length)
-
-          setUploadedFiles(prev => prev.map(f =>
-            f.id === fileId ? { ...f, progress: 70 } : f
-          ))
-
-          // Save analysis to localStorage
-          const analysisId = 'analysis_' + Date.now()
-          const savedAnalyses = JSON.parse(localStorage.getItem('upc_analyses') || '[]')
-          const newAnalysis = {
-            id: analysisId,
-            fileName: fileObj.file.name,
-            status: 'COMPLETED',
-            conflictsFound: conflicts.length,
-            totalRows: results.data.length,
-            conflicts,
-            data: results.data,
-            createdAt: new Date().toISOString()
+      if (extension === 'csv') {
+        // Parse CSV
+        console.log('📤 [UPLOAD PAGE] Parsing CSV file...')
+        Papa.parse(fileObj.file, {
+          header: true,
+          skipEmptyLines: true,
+          complete: (results) => {
+            console.log('📤 [UPLOAD PAGE] CSV parsed:', results.data.length, 'rows')
+            processData(fileId, results.data as UPCRow[], fileObj.file.name)
+          },
+          error: (error) => {
+            console.error('📤 [UPLOAD PAGE] ❌ CSV parse error:', error)
+            setUploadedFiles(prev => prev.map(f =>
+              f.id === fileId ? { ...f, status: 'error', error: error.message } : f
+            ))
           }
+        })
+      } else if (extension === 'xlsx' || extension === 'xls') {
+        // Parse Excel
+        console.log('📤 [UPLOAD PAGE] Parsing Excel file...')
+        const reader = new FileReader()
 
-          savedAnalyses.push(newAnalysis)
-          localStorage.setItem('upc_analyses', JSON.stringify(savedAnalyses))
-          console.log('📤 [UPLOAD PAGE] ✅ Analysis saved:', analysisId)
+        reader.onload = (e) => {
+          try {
+            const data = new Uint8Array(e.target?.result as ArrayBuffer)
+            const workbook = XLSX.read(data, { type: 'array' })
 
+            // Get first sheet
+            const firstSheetName = workbook.SheetNames[0]
+            const worksheet = workbook.Sheets[firstSheetName]
+
+            // Convert to JSON
+            const jsonData = XLSX.utils.sheet_to_json(worksheet)
+            console.log('📤 [UPLOAD PAGE] Excel parsed:', jsonData.length, 'rows')
+
+            processData(fileId, jsonData as UPCRow[], fileObj.file.name)
+          } catch (error: any) {
+            console.error('📤 [UPLOAD PAGE] ❌ Excel parse error:', error)
+            setUploadedFiles(prev => prev.map(f =>
+              f.id === fileId ? { ...f, status: 'error', error: error.message } : f
+            ))
+          }
+        }
+
+        reader.onerror = (error) => {
+          console.error('📤 [UPLOAD PAGE] ❌ File read error:', error)
           setUploadedFiles(prev => prev.map(f =>
-            f.id === fileId
-              ? {
-                  ...f,
-                  status: 'completed',
-                  progress: 100,
-                  analysisId,
-                  rowCount: results.data.length,
-                  conflictCount: conflicts.length
-                }
-              : f
-          ))
-        },
-        error: (error) => {
-          console.error('📤 [UPLOAD PAGE] ❌ Parse error:', error)
-          setUploadedFiles(prev => prev.map(f =>
-            f.id === fileId ? { ...f, status: 'error', error: error.message } : f
+            f.id === fileId ? { ...f, status: 'error', error: 'Failed to read file' } : f
           ))
         }
-      })
+
+        reader.readAsArrayBuffer(fileObj.file)
+      }
     } catch (error: any) {
       console.error('📤 [UPLOAD PAGE] ❌ Processing error:', error)
       setUploadedFiles(prev => prev.map(f =>
         f.id === fileId ? { ...f, status: 'error', error: error.message } : f
       ))
     }
+  }
+
+  const processData = (fileId: string, data: UPCRow[], fileName: string) => {
+    setUploadedFiles(prev => prev.map(f =>
+      f.id === fileId ? { ...f, progress: 40 } : f
+    ))
+
+    // Detect conflicts
+    const conflicts = detectConflicts(data)
+    console.log('📤 [UPLOAD PAGE] Conflicts detected:', conflicts.length)
+
+    setUploadedFiles(prev => prev.map(f =>
+      f.id === fileId ? { ...f, progress: 70 } : f
+    ))
+
+    // Save analysis to localStorage
+    const analysisId = 'analysis_' + Date.now()
+    const savedAnalyses = JSON.parse(localStorage.getItem('upc_analyses') || '[]')
+    const newAnalysis = {
+      id: analysisId,
+      fileName,
+      status: 'COMPLETED',
+      conflictsFound: conflicts.length,
+      totalRows: data.length,
+      conflicts,
+      data,
+      createdAt: new Date().toISOString()
+    }
+
+    savedAnalyses.push(newAnalysis)
+    localStorage.setItem('upc_analyses', JSON.stringify(savedAnalyses))
+    console.log('📤 [UPLOAD PAGE] ✅ Analysis saved:', analysisId)
+
+    setUploadedFiles(prev => prev.map(f =>
+      f.id === fileId
+        ? {
+            ...f,
+            status: 'completed',
+            progress: 100,
+            analysisId,
+            rowCount: data.length,
+            conflictCount: conflicts.length
+          }
+        : f
+    ))
   }
 
   const detectConflicts = (data: UPCRow[]): Conflict[] => {
@@ -194,6 +245,7 @@ export default function UploadPage() {
 
     if (!upcColumn) {
       console.warn('🔍 [CONFLICT DETECTION] ⚠️ No UPC column found')
+      console.warn('🔍 [CONFLICT DETECTION] Available columns:', Object.keys(firstRow))
       return conflicts
     }
 
@@ -299,6 +351,7 @@ export default function UploadPage() {
   }
 
   const removeFile = (fileId: string) => {
+    console.log('📤 [UPLOAD PAGE] Removing file:', fileId)
     setUploadedFiles(prev => prev.filter(f => f.id !== fileId))
   }
 
@@ -316,7 +369,7 @@ export default function UploadPage() {
         <div className="container mx-auto px-6 py-6">
           <h1 className="text-3xl font-bold text-white">Upload & Analyze Files</h1>
           <p className="text-slate-400 mt-2">
-            Upload CSV files to detect UPC conflicts in real-time
+            Upload CSV or Excel files to detect UPC conflicts in real-time
           </p>
         </div>
       </div>
@@ -342,33 +395,36 @@ export default function UploadPage() {
                 id="file-upload"
                 className="hidden"
                 multiple
-                accept=".csv"
+                accept=".csv,.xlsx,.xls"
                 onChange={handleChange}
               />
 
               <Upload className="w-16 h-16 text-blue-400 mx-auto mb-4" />
 
               <h3 className="text-xl font-semibold text-white mb-2">
-                {dragActive ? 'Drop your CSV files here' : 'Upload CSV Files'}
+                {dragActive ? 'Drop your files here' : 'Upload CSV or Excel Files'}
               </h3>
 
               <p className="text-slate-400 mb-6">
-                Drag and drop CSV files here, or click to browse
+                Drag and drop files here, or click to browse
               </p>
 
               <AnimatedButton
                 variant="gradient"
                 ripple
                 glow
-                onClick={() => document.getElementById('file-upload')?.click()}
+                onClick={() => {
+                  console.log('📤 [UPLOAD PAGE] ======= SELECT FILES BUTTON CLICKED =======')
+                  document.getElementById('file-upload')?.click()
+                }}
                 className="inline-flex items-center"
               >
                 <FileSpreadsheet className="w-5 h-5 mr-2" />
-                Select CSV Files
+                Select Files
               </AnimatedButton>
 
               <p className="text-sm text-slate-500 mt-4">
-                CSV files only • Unlimited file size • Processed locally in your browser
+                CSV, XLSX, XLS • Unlimited file size • Processed locally in your browser
               </p>
             </div>
           </AnimatedCard>
@@ -443,7 +499,11 @@ export default function UploadPage() {
                         <AnimatedButton
                           variant="gradient"
                           ripple
-                          onClick={() => processFile(file.id)}
+                          onClick={() => {
+                            console.log('📤 [UPLOAD PAGE] ======= ANALYZE BUTTON CLICKED =======')
+                            console.log('📤 [UPLOAD PAGE] File ID:', file.id)
+                            processFile(file.id)
+                          }}
                           className="flex items-center gap-2"
                         >
                           <Play className="w-4 h-4" />
@@ -474,34 +534,31 @@ export default function UploadPage() {
 
           {/* Info Card */}
           <AnimatedCard variant="gradient" className="mt-8 p-6">
-            <h3 className="font-semibold text-white mb-4">How It Works</h3>
-            <div className="grid md:grid-cols-3 gap-6">
-              <div>
-                <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center mb-3">
-                  <span className="text-xl font-bold text-blue-400">1</span>
+            <h3 className="font-semibold text-white mb-4">✨ What We Detect</h3>
+            <div className="grid md:grid-cols-2 gap-4 text-sm text-slate-300">
+              <div className="flex items-start gap-2">
+                <span className="text-red-400">•</span>
+                <div>
+                  <strong>Duplicate UPCs:</strong> Same barcode appearing multiple times
                 </div>
-                <h4 className="font-semibold text-white mb-2">Upload CSV</h4>
-                <p className="text-sm text-slate-300">
-                  Upload your inventory CSV file with UPC codes
-                </p>
               </div>
-              <div>
-                <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center mb-3">
-                  <span className="text-xl font-bold text-purple-400">2</span>
+              <div className="flex items-start gap-2">
+                <span className="text-orange-400">•</span>
+                <div>
+                  <strong>Invalid Formats:</strong> Non-numeric or wrong-length UPCs
                 </div>
-                <h4 className="font-semibold text-white mb-2">Auto-Detect</h4>
-                <p className="text-sm text-slate-300">
-                  AI instantly detects duplicates, format errors, and price mismatches
-                </p>
               </div>
-              <div>
-                <div className="w-10 h-10 bg-pink-500/20 rounded-lg flex items-center justify-center mb-3">
-                  <span className="text-xl font-bold text-pink-400">3</span>
+              <div className="flex items-start gap-2">
+                <span className="text-yellow-400">•</span>
+                <div>
+                  <strong>Missing Data:</strong> Empty UPC fields
                 </div>
-                <h4 className="font-semibold text-white mb-2">Resolve</h4>
-                <p className="text-sm text-slate-300">
-                  Review and resolve conflicts with detailed insights
-                </p>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-purple-400">•</span>
+                <div>
+                  <strong>Price Mismatches:</strong> Same UPC with different prices
+                </div>
               </div>
             </div>
           </AnimatedCard>
