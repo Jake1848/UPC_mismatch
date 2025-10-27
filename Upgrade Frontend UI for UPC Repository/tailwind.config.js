@@ -1,26 +1,27 @@
-import type { Config } from "tailwindcss"
-
-const config: Config = {
-  darkMode: ["class"],
+/** @type {import('tailwindcss').Config} */
+module.exports = {
   content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        // Glassmorphic theme colors
+        glass: {
+          light: 'rgba(255, 255, 255, 0.25)',
+          dark: 'rgba(45, 55, 72, 0.25)',
+          border: {
+            light: 'rgba(255, 255, 255, 0.18)',
+            dark: 'rgba(255, 255, 255, 0.1)',
+          },
+        },
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
           50: '#f0f4ff',
           100: '#e0e7ff',
           500: '#667eea',
@@ -30,8 +31,6 @@ const config: Config = {
           900: '#3c366b',
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
           50: '#faf5ff',
           100: '#f3e8ff',
           500: '#764ba2',
@@ -40,38 +39,12 @@ const config: Config = {
           800: '#4c3179',
           900: '#3e2954',
         },
-        destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
-        },
-        muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
-        },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
           blue: '#4299e1',
           purple: '#b794f6',
           green: '#68d391',
           orange: '#f6ad55',
           red: '#fc8181',
-        },
-        popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
-        },
-        card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
-        },
-        glass: {
-          light: 'rgba(255, 255, 255, 0.25)',
-          dark: 'rgba(45, 55, 72, 0.25)',
-          border: {
-            light: 'rgba(255, 255, 255, 0.18)',
-            dark: 'rgba(255, 255, 255, 0.1)',
-          },
         },
         gray: {
           50: '#f7fafc',
@@ -126,12 +99,12 @@ const config: Config = {
       },
       keyframes: {
         'accordion-down': {
-          from: { height: '0' },
+          from: { height: 0 },
           to: { height: 'var(--radix-accordion-content-height)' },
         },
         'accordion-up': {
           from: { height: 'var(--radix-accordion-content-height)' },
-          to: { height: '0' },
+          to: { height: 0 },
         },
         fadeIn: {
           '0%': { opacity: '0' },
@@ -211,9 +184,6 @@ const config: Config = {
         'glow-xl': '0 0 40px rgba(59, 130, 246, 0.5)',
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
         'glass': '16px',
         'glass-lg': '20px',
         'glass-xl': '24px',
@@ -233,9 +203,10 @@ const config: Config = {
     },
   },
   plugins: [
-    require("tailwindcss-animate"),
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
     // Custom plugin for glassmorphism utilities
-    function({ addUtilities }: any) {
+    function({ addUtilities }) {
       const glassUtilities = {
         '.glass': {
           background: 'rgba(255, 255, 255, 0.25)',
@@ -266,5 +237,3 @@ const config: Config = {
     }
   ],
 }
-
-export default config
