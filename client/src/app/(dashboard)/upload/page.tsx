@@ -69,26 +69,45 @@ export default function UploadPage() {
   }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault()
-    if (e.target.files && e.target.files[0]) {
-      console.log('📤 [UPLOAD PAGE] Files selected:', e.target.files.length)
-      handleFiles(Array.from(e.target.files))
+    console.log('═══════════════════════════════════════════════════')
+    console.log('📤 [UPLOAD PAGE] ======= FILE INPUT CHANGE EVENT FIRED =======')
+    console.log('📤 [UPLOAD PAGE] Event:', e)
+    console.log('📤 [UPLOAD PAGE] Target:', e.target)
+    console.log('📤 [UPLOAD PAGE] Files object:', e.target.files)
+    console.log('📤 [UPLOAD PAGE] Files count:', e.target.files?.length)
+    console.log('═══════════════════════════════════════════════════')
+
+    if (e.target.files && e.target.files.length > 0) {
+      console.log('✅ Files detected, processing...')
+      const fileArray = Array.from(e.target.files)
+      console.log('📤 [UPLOAD PAGE] Files array:', fileArray.map(f => f.name))
+      handleFiles(fileArray)
+    } else {
+      console.error('❌ No files found in input')
     }
   }
 
   const handleFiles = async (files: File[]) => {
-    console.log('📤 [UPLOAD PAGE] Processing files:', files.map(f => f.name))
+    console.log('═══════════════════════════════════════════════════')
+    console.log('📤 [UPLOAD PAGE] ======= HANDLE FILES CALLED =======')
+    console.log('📤 [UPLOAD PAGE] Files received:', files.length)
+    console.log('📤 [UPLOAD PAGE] File names:', files.map(f => f.name))
+    console.log('═══════════════════════════════════════════════════')
+
     const validFiles = files.filter(file => {
       const extension = file.name.split('.').pop()?.toLowerCase()
-      return extension === 'csv' || extension === 'xlsx' || extension === 'xls'
+      const isValid = extension === 'csv' || extension === 'xlsx' || extension === 'xls'
+      console.log(`📤 [UPLOAD PAGE] ${file.name} -> ${extension} -> ${isValid ? '✅ VALID' : '❌ INVALID'}`)
+      return isValid
     })
 
+    console.log('📤 [UPLOAD PAGE] Valid files count:', validFiles.length)
+
     if (validFiles.length === 0) {
+      console.error('❌ No valid files found!')
       alert('Please upload CSV or Excel files (.csv, .xlsx, .xls)')
       return
     }
-
-    console.log('📤 [UPLOAD PAGE] Valid files:', validFiles.length)
 
     for (const file of validFiles) {
       const fileId = Math.random().toString(36).substring(7)
@@ -99,9 +118,17 @@ export default function UploadPage() {
         progress: 0
       }
 
-      console.log('📤 [UPLOAD PAGE] Adding file:', file.name, 'ID:', fileId)
-      setUploadedFiles(prev => [...prev, uploadedFile])
+      console.log('📤 [UPLOAD PAGE] ✅ Adding file to queue:', file.name, 'ID:', fileId)
+      console.log('📤 [UPLOAD PAGE] Current uploadedFiles state before update:', uploadedFiles.length)
+
+      setUploadedFiles(prev => {
+        const newState = [...prev, uploadedFile]
+        console.log('📤 [UPLOAD PAGE] New uploadedFiles state:', newState.length)
+        return newState
+      })
     }
+
+    console.log('📤 [UPLOAD PAGE] ✅ All files added to queue')
   }
 
   const processFile = async (fileId: string) => {
@@ -409,16 +436,30 @@ export default function UploadPage() {
                 Drag and drop files here, or click to browse
               </p>
 
-              <label
-                htmlFor="file-upload"
-                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold cursor-pointer hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
-                onClick={() => {
-                  console.log('📤 [UPLOAD PAGE] ======= SELECT FILES BUTTON CLICKED =======')
+              <button
+                type="button"
+                onClick={(e) => {
+                  console.log('═══════════════════════════════════════════════════')
+                  console.log('📤 [UPLOAD PAGE] ======= BUTTON CLICKED =======')
+                  console.log('📤 [UPLOAD PAGE] Event:', e)
+                  console.log('📤 [UPLOAD PAGE] Looking for input element...')
+                  const input = document.getElementById('file-upload') as HTMLInputElement
+                  console.log('📤 [UPLOAD PAGE] Input element found:', !!input)
+                  if (input) {
+                    console.log('📤 [UPLOAD PAGE] Input type:', input.type)
+                    console.log('📤 [UPLOAD PAGE] Triggering click on input...')
+                    input.click()
+                    console.log('📤 [UPLOAD PAGE] Input click triggered!')
+                  } else {
+                    console.error('❌ Input element not found!')
+                  }
+                  console.log('═══════════════════════════════════════════════════')
                 }}
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold cursor-pointer hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
               >
                 <FileSpreadsheet className="w-5 h-5 mr-2" />
-                Select Files
-              </label>
+                Select Files (Click Me!)
+              </button>
 
               <p className="text-sm text-slate-500 mt-4">
                 CSV, XLSX, XLS • Unlimited file size • Processed locally in your browser
