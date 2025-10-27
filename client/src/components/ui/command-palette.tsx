@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useHotkeys } from 'react-hotkeys-hook'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
 import {
-  MagnifyingGlassIcon,
-  HomeIcon,
-  CloudArrowUpIcon,
-  ChartBarIcon,
-  CogIcon,
-  DocumentTextIcon,
-  SparklesIcon,
-  XMarkIcon
-} from '@heroicons/react/24/outline'
+  Search as MagnifyingGlassIcon,
+  Home as HomeIcon,
+  Upload as CloudArrowUpIcon,
+  BarChart3 as ChartBarIcon,
+  Settings as CogIcon,
+  FileText as DocumentTextIcon,
+  Sparkles as SparklesIcon,
+  X as XMarkIcon
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface Command {

@@ -1,12 +1,12 @@
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  CheckCircleIcon,
-  XCircleIcon,
-  ExclamationTriangleIcon,
-  InformationCircleIcon,
-  XMarkIcon
-} from '@heroicons/react/24/outline'
+  CheckCircle as CheckCircleIcon,
+  XCircle as XCircleIcon,
+  AlertTriangle as ExclamationTriangleIcon,
+  Info as InformationCircleIcon,
+  X as XMarkIcon
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info'
