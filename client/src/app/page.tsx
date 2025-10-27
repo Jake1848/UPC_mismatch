@@ -32,18 +32,21 @@ export default function Home() {
           <div className="text-2xl font-bold text-white">
             UPC Resolver
           </div>
-          <AnimatedButton
-            variant="primary"
-            ripple
-            onClick={() => {
-              console.log('🏠 [HOME PAGE] ======= SIGN IN BUTTON CLICKED =======')
-              console.log('🏠 [HOME PAGE] Navigating to: /login')
-              console.log('🏠 [HOME PAGE] Current location:', window.location.href)
-              window.location.href = '/login'
-            }}
-          >
-            Sign In
-          </AnimatedButton>
+          <div className="flex gap-4">
+            <AnimatedButton
+              variant="gradient"
+              ripple
+              glow
+              onClick={() => {
+                console.log('🏠 [HOME PAGE] ======= USE TOOL BUTTON CLICKED =======')
+                console.log('🏠 [HOME PAGE] Navigating to: /dashboard')
+                console.log('🏠 [HOME PAGE] Current location:', window.location.href)
+                window.location.href = '/dashboard'
+              }}
+            >
+              🚀 Use Tool (No Login)
+            </AnimatedButton>
+          </div>
         </nav>
 
         <motion.div
@@ -73,35 +76,25 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.8 }}
-            className="flex gap-4 justify-center"
+            className="flex flex-col items-center gap-4"
           >
             <AnimatedButton
               variant="gradient"
               ripple
               glow
               onClick={() => {
-                console.log('🏠 [HOME PAGE] ======= GET STARTED BUTTON CLICKED =======')
-                console.log('🏠 [HOME PAGE] Navigating to: /register')
+                console.log('🏠 [HOME PAGE] ======= TRY IT NOW BUTTON CLICKED =======')
+                console.log('🏠 [HOME PAGE] Navigating to: /dashboard')
                 console.log('🏠 [HOME PAGE] Current location:', window.location.href)
-                window.location.href = '/register'
+                window.location.href = '/dashboard'
               }}
-              className="px-8 py-4 flex items-center gap-2"
+              className="px-12 py-5 text-xl flex items-center gap-2"
             >
-              Get Started <ArrowRight className="w-5 h-5" />
+              🚀 Try It Now - No Login Required <ArrowRight className="w-6 h-6" />
             </AnimatedButton>
-            <AnimatedButton
-              variant="secondary"
-              ripple
-              onClick={() => {
-                console.log('🏠 [HOME PAGE] ======= VIEW DEMO BUTTON CLICKED =======')
-                console.log('🏠 [HOME PAGE] Navigating to: /demo')
-                console.log('🏠 [HOME PAGE] Current location:', window.location.href)
-                window.location.href = '/demo'
-              }}
-              className="px-8 py-4"
-            >
-              View Demo
-            </AnimatedButton>
+            <p className="text-slate-400 text-sm">
+              Upload CSV files instantly • 100% free • No registration needed
+            </p>
           </motion.div>
         </motion.div>
 
