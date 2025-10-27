@@ -29,8 +29,17 @@ export default function DashboardLayout({
     console.log('🎛️ [DASHBOARD LAYOUT] Component MOUNTED')
     console.log('🎛️ [DASHBOARD LAYOUT] Current pathname:', pathname)
     console.log('🎛️ [DASHBOARD LAYOUT] Timestamp:', new Date().toISOString())
+    console.log('🎛️ [DASHBOARD LAYOUT] ⚠️ AUTH BYPASSED FOR TESTING')
     console.log('═══════════════════════════════════════════════════')
 
+    // TEMP: Bypass auth for testing
+    setUser({
+      name: 'Test User',
+      email: 'test@example.com',
+      organization: { name: 'Test Organization' }
+    })
+
+    /* COMMENTED OUT FOR TESTING - RESTORE LATER
     const token = localStorage.getItem('token')
     console.log('🎛️ [DASHBOARD LAYOUT] Token exists:', !!token)
 
@@ -41,6 +50,7 @@ export default function DashboardLayout({
     }
 
     fetchUser()
+    */
 
     return () => {
       console.log('🎛️ [DASHBOARD LAYOUT] Component UNMOUNTED')
@@ -78,11 +88,11 @@ export default function DashboardLayout({
     console.log('═══════════════════════════════════════════════════')
     console.log('🎛️ [DASHBOARD LAYOUT] ======= LOGOUT INITIATED =======')
     console.log('🎛️ [DASHBOARD LAYOUT] Timestamp:', new Date().toISOString())
+    console.log('🎛️ [DASHBOARD LAYOUT] ⚠️ Auth bypassed - staying on dashboard')
     console.log('═══════════════════════════════════════════════════')
-    localStorage.removeItem('token')
-    console.log('🎛️ [DASHBOARD LAYOUT] Token removed')
-    console.log('🎛️ [DASHBOARD LAYOUT] Redirecting to login')
-    router.push('/auth/login')
+    // TEMP: Bypass logout for testing
+    // localStorage.removeItem('token')
+    // router.push('/auth/login')
   }
 
   const navItems = [

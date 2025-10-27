@@ -79,6 +79,41 @@ export default function DashboardPage() {
 
   const fetchDashboardData = async () => {
     console.log('📊 [DASHBOARD PAGE] ======= FETCHING DASHBOARD DATA =======')
+    console.log('📊 [DASHBOARD PAGE] ⚠️ AUTH BYPASSED - Using mock data')
+
+    // TEMP: Bypass auth and use mock data for testing
+    setUser({
+      name: 'Test User',
+      email: 'test@example.com',
+      organization: { name: 'Test Organization' }
+    })
+
+    // Set mock stats from localStorage or default
+    const savedAnalyses = JSON.parse(localStorage.getItem('upc_analyses') || '[]')
+    const mockStats: Stats = {
+      totalAnalyses: savedAnalyses.length,
+      totalConflicts: savedAnalyses.reduce((sum: number, a: any) => sum + (a.conflicts?.length || 0), 0),
+      resolvedConflicts: 0,
+      totalRows: savedAnalyses.reduce((sum: number, a: any) => sum + (a.totalRows || 0), 0),
+      bySeverity: { LOW: 5, MEDIUM: 8, HIGH: 3, CRITICAL: 2 },
+      byStatus: { PENDING: 12, IN_PROGRESS: 4, RESOLVED: 2, IGNORED: 0 },
+      byType: {
+        DUPLICATE_UPC: 6,
+        INVALID_FORMAT: 4,
+        MISSING_DATA: 3,
+        PRICE_MISMATCH: 2,
+        QUANTITY_MISMATCH: 2,
+        LOCATION_CONFLICT: 1
+      }
+    }
+
+    setStats(mockStats)
+    setRecentAnalyses(savedAnalyses.slice(0, 5))
+    setLoading(false)
+    console.log('📊 [DASHBOARD PAGE] ✅ Mock data loaded')
+    return
+
+    /* COMMENTED OUT FOR TESTING - RESTORE LATER
     const token = localStorage.getItem('token')
     console.log('📊 [DASHBOARD PAGE] Token from localStorage:', token ? `${token.substring(0, 20)}...` : 'NULL')
 
@@ -152,6 +187,7 @@ export default function DashboardPage() {
       console.log('📊 [DASHBOARD PAGE] Token removed, redirecting to login')
       router.push('/auth/login')
     }
+    */
   }
 
   if (loading) {
