@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { LogIn } from 'lucide-react'
@@ -16,30 +16,69 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
+  useEffect(() => {
+    console.log('═══════════════════════════════════════════════════')
+    console.log('🔐 [LOGIN PAGE] Component MOUNTED')
+    console.log('🔐 [LOGIN PAGE] Current URL:', window.location.href)
+    console.log('🔐 [LOGIN PAGE] Timestamp:', new Date().toISOString())
+    console.log('═══════════════════════════════════════════════════')
+
+    return () => {
+      console.log('🔐 [LOGIN PAGE] Component UNMOUNTED')
+    }
+  }, [])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log('═══════════════════════════════════════════════════')
+    console.log('🔐 [LOGIN PAGE] ======= LOGIN FORM SUBMITTED =======')
+    console.log('🔐 [LOGIN PAGE] Email:', email)
+    console.log('🔐 [LOGIN PAGE] Password length:', password.length)
+    console.log('🔐 [LOGIN PAGE] Timestamp:', new Date().toISOString())
+    console.log('═══════════════════════════════════════════════════')
+
     setError('')
     setLoading(true)
 
     try {
+      console.log('🔐 [LOGIN PAGE] Sending POST request to /api/auth/login')
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       })
 
+      console.log('🔐 [LOGIN PAGE] Response received')
+      console.log('🔐 [LOGIN PAGE] Status:', res.status)
+      console.log('🔐 [LOGIN PAGE] Status Text:', res.statusText)
+      console.log('🔐 [LOGIN PAGE] OK:', res.ok)
+      console.log('🔐 [LOGIN PAGE] Headers:', Object.fromEntries(res.headers.entries()))
+
       if (!res.ok) {
         const data = await res.json()
+        console.error('🔐 [LOGIN PAGE] ❌ Login FAILED')
+        console.error('🔐 [LOGIN PAGE] Error data:', data)
         throw new Error(data.message || 'Login failed')
       }
 
       const data = await res.json()
+      console.log('🔐 [LOGIN PAGE] ✅ Login SUCCESSFUL')
+      console.log('🔐 [LOGIN PAGE] Response data keys:', Object.keys(data))
+      console.log('🔐 [LOGIN PAGE] Token exists:', !!data.token)
+      console.log('🔐 [LOGIN PAGE] Token length:', data.token?.length)
+
       localStorage.setItem('token', data.token)
+      console.log('🔐 [LOGIN PAGE] Token saved to localStorage')
+      console.log('🔐 [LOGIN PAGE] Redirecting to /dashboard')
       router.push('/dashboard')
     } catch (err: any) {
+      console.error('🔐 [LOGIN PAGE] ❌ Exception caught:', err)
+      console.error('🔐 [LOGIN PAGE] Error message:', err.message)
+      console.error('🔐 [LOGIN PAGE] Error stack:', err.stack)
       setError(err.message)
     } finally {
       setLoading(false)
+      console.log('🔐 [LOGIN PAGE] Login process completed')
     }
   }
 

@@ -6,8 +6,23 @@ import { AnimatedButton } from '@/components/ui/animated-button'
 import { AnimatedCard } from '@/components/ui/animated-card'
 import { GradientMesh } from '@/components/ui/particle-background'
 import { motion } from 'framer-motion'
+import { useEffect } from 'react'
 
 export default function Home() {
+  useEffect(() => {
+    console.log('═══════════════════════════════════════════════════')
+    console.log('🏠 [HOME PAGE] Component MOUNTED')
+    console.log('🏠 [HOME PAGE] Current URL:', window.location.href)
+    console.log('🏠 [HOME PAGE] Current pathname:', window.location.pathname)
+    console.log('🏠 [HOME PAGE] Current search:', window.location.search)
+    console.log('🏠 [HOME PAGE] Current hash:', window.location.hash)
+    console.log('🏠 [HOME PAGE] Timestamp:', new Date().toISOString())
+    console.log('═══════════════════════════════════════════════════')
+
+    return () => {
+      console.log('🏠 [HOME PAGE] Component UNMOUNTED')
+    }
+  }, [])
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 relative overflow-hidden">
       <GradientMesh />
@@ -20,7 +35,12 @@ export default function Home() {
           <AnimatedButton
             variant="primary"
             ripple
-            onClick={() => window.location.href = '/login'}
+            onClick={() => {
+              console.log('🏠 [HOME PAGE] ======= SIGN IN BUTTON CLICKED =======')
+              console.log('🏠 [HOME PAGE] Navigating to: /login')
+              console.log('🏠 [HOME PAGE] Current location:', window.location.href)
+              window.location.href = '/login'
+            }}
           >
             Sign In
           </AnimatedButton>
@@ -59,7 +79,12 @@ export default function Home() {
               variant="gradient"
               ripple
               glow
-              onClick={() => window.location.href = '/register'}
+              onClick={() => {
+                console.log('🏠 [HOME PAGE] ======= GET STARTED BUTTON CLICKED =======')
+                console.log('🏠 [HOME PAGE] Navigating to: /register')
+                console.log('🏠 [HOME PAGE] Current location:', window.location.href)
+                window.location.href = '/register'
+              }}
               className="px-8 py-4 flex items-center gap-2"
             >
               Get Started <ArrowRight className="w-5 h-5" />
@@ -67,7 +92,12 @@ export default function Home() {
             <AnimatedButton
               variant="secondary"
               ripple
-              onClick={() => window.location.href = '/demo'}
+              onClick={() => {
+                console.log('🏠 [HOME PAGE] ======= VIEW DEMO BUTTON CLICKED =======')
+                console.log('🏠 [HOME PAGE] Navigating to: /demo')
+                console.log('🏠 [HOME PAGE] Current location:', window.location.href)
+                window.location.href = '/demo'
+              }}
               className="px-8 py-4"
             >
               View Demo

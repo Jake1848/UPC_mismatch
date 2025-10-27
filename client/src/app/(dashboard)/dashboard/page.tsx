@@ -63,48 +63,93 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    console.log('═══════════════════════════════════════════════════')
+    console.log('📊 [DASHBOARD PAGE] Component MOUNTED')
+    console.log('📊 [DASHBOARD PAGE] Current URL:', window.location.href)
+    console.log('📊 [DASHBOARD PAGE] Timestamp:', new Date().toISOString())
+    console.log('═══════════════════════════════════════════════════')
+
     fetchDashboardData()
+
+    return () => {
+      console.log('📊 [DASHBOARD PAGE] Component UNMOUNTED')
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router])
 
   const fetchDashboardData = async () => {
+    console.log('📊 [DASHBOARD PAGE] ======= FETCHING DASHBOARD DATA =======')
     const token = localStorage.getItem('token')
+    console.log('📊 [DASHBOARD PAGE] Token from localStorage:', token ? `${token.substring(0, 20)}...` : 'NULL')
+
     if (!token) {
+      console.warn('📊 [DASHBOARD PAGE] ⚠️ NO TOKEN FOUND - Redirecting to login')
       router.push('/auth/login')
       return
     }
 
     try {
       // Fetch user profile
+      console.log('📊 [DASHBOARD PAGE] → Fetching user profile from /api/auth/me')
       const userRes = await fetch('/api/auth/me', {
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      if (!userRes.ok) throw new Error('Auth failed')
+      console.log('📊 [DASHBOARD PAGE] ← User profile response:', userRes.status, userRes.statusText)
+
+      if (!userRes.ok) {
+        console.error('📊 [DASHBOARD PAGE] ❌ User profile fetch failed')
+        throw new Error('Auth failed')
+      }
+
       const userData = await userRes.json()
+      console.log('📊 [DASHBOARD PAGE] ✅ User data received:', {
+        name: userData.user?.name,
+        email: userData.user?.email,
+        organization: userData.user?.organization?.name
+      })
       setUser(userData.user)
 
       // Fetch conflict stats
+      console.log('📊 [DASHBOARD PAGE] → Fetching stats from /api/conflicts/stats')
       const statsRes = await fetch('/api/conflicts/stats', {
         headers: { 'Authorization': `Bearer ${token}` }
       })
+      console.log('📊 [DASHBOARD PAGE] ← Stats response:', statsRes.status, statsRes.statusText)
+
       if (statsRes.ok) {
         const statsData = await statsRes.json()
+        console.log('📊 [DASHBOARD PAGE] ✅ Stats received:', {
+          totalAnalyses: statsData.statistics?.totalAnalyses,
+          totalConflicts: statsData.statistics?.totalConflicts,
+          resolvedConflicts: statsData.statistics?.resolvedConflicts
+        })
         setStats(statsData.statistics)
+      } else {
+        console.warn('📊 [DASHBOARD PAGE] ⚠️ Stats fetch failed')
       }
 
       // Fetch recent analyses
+      console.log('📊 [DASHBOARD PAGE] → Fetching analyses from /api/analysis?limit=5')
       const analysesRes = await fetch('/api/analysis?limit=5', {
         headers: { 'Authorization': `Bearer ${token}` }
       })
+      console.log('📊 [DASHBOARD PAGE] ← Analyses response:', analysesRes.status, analysesRes.statusText)
+
       if (analysesRes.ok) {
         const analysesData = await analysesRes.json()
+        console.log('📊 [DASHBOARD PAGE] ✅ Analyses received: Count =', analysesData.analyses?.length)
         setRecentAnalyses(analysesData.analyses)
+      } else {
+        console.warn('📊 [DASHBOARD PAGE] ⚠️ Analyses fetch failed')
       }
 
+      console.log('📊 [DASHBOARD PAGE] ✅ All dashboard data loaded successfully')
       setLoading(false)
     } catch (error) {
-      console.error('Dashboard error:', error)
+      console.error('📊 [DASHBOARD PAGE] ❌ CRITICAL ERROR:', error)
+      console.error('📊 [DASHBOARD PAGE] Error stack:', (error as Error).stack)
       localStorage.removeItem('token')
+      console.log('📊 [DASHBOARD PAGE] Token removed, redirecting to login')
       router.push('/auth/login')
     }
   }

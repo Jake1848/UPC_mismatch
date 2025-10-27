@@ -25,35 +25,63 @@ export default function DashboardLayout({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
+    console.log('═══════════════════════════════════════════════════')
+    console.log('🎛️ [DASHBOARD LAYOUT] Component MOUNTED')
+    console.log('🎛️ [DASHBOARD LAYOUT] Current pathname:', pathname)
+    console.log('🎛️ [DASHBOARD LAYOUT] Timestamp:', new Date().toISOString())
+    console.log('═══════════════════════════════════════════════════')
+
     const token = localStorage.getItem('token')
+    console.log('🎛️ [DASHBOARD LAYOUT] Token exists:', !!token)
+
     if (!token) {
+      console.warn('🎛️ [DASHBOARD LAYOUT] ⚠️ NO TOKEN - Redirecting to login')
       router.push('/auth/login')
       return
     }
 
     fetchUser()
+
+    return () => {
+      console.log('🎛️ [DASHBOARD LAYOUT] Component UNMOUNTED')
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router])
 
   const fetchUser = async () => {
     try {
+      console.log('🎛️ [DASHBOARD LAYOUT] → Fetching user from /api/auth/me')
       const token = localStorage.getItem('token')
       const res = await fetch('/api/auth/me', {
         headers: { 'Authorization': `Bearer ${token}` }
       })
 
-      if (!res.ok) throw new Error('Auth failed')
+      console.log('🎛️ [DASHBOARD LAYOUT] ← Response:', res.status, res.statusText)
+
+      if (!res.ok) {
+        console.error('🎛️ [DASHBOARD LAYOUT] ❌ Auth failed')
+        throw new Error('Auth failed')
+      }
 
       const data = await res.json()
+      console.log('🎛️ [DASHBOARD LAYOUT] ✅ User data received:', data.user?.name)
       setUser(data.user)
     } catch (error) {
+      console.error('🎛️ [DASHBOARD LAYOUT] ❌ Error fetching user:', error)
       localStorage.removeItem('token')
+      console.log('🎛️ [DASHBOARD LAYOUT] Token removed, redirecting to login')
       router.push('/auth/login')
     }
   }
 
   const handleLogout = () => {
+    console.log('═══════════════════════════════════════════════════')
+    console.log('🎛️ [DASHBOARD LAYOUT] ======= LOGOUT INITIATED =======')
+    console.log('🎛️ [DASHBOARD LAYOUT] Timestamp:', new Date().toISOString())
+    console.log('═══════════════════════════════════════════════════')
     localStorage.removeItem('token')
+    console.log('🎛️ [DASHBOARD LAYOUT] Token removed')
+    console.log('🎛️ [DASHBOARD LAYOUT] Redirecting to login')
     router.push('/auth/login')
   }
 
