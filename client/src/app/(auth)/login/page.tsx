@@ -4,6 +4,10 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { LogIn } from 'lucide-react'
+import { AnimatedButton } from '@/components/ui/animated-button'
+import { AnimatedCard } from '@/components/ui/animated-card'
+import { FloatingOrbs } from '@/components/ui/particle-background'
+import { motion } from 'framer-motion'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -40,8 +44,14 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
+      <FloatingOrbs orbCount={3} />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="w-full max-w-md relative z-10"
+      >
         {/* Logo/Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
@@ -49,7 +59,7 @@ export default function LoginPage() {
         </div>
 
         {/* Login Form */}
-        <div className="bg-slate-900/50 backdrop-blur border border-slate-800 rounded-xl p-8">
+        <AnimatedCard variant="glass" hover3D className="p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
               <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4 text-red-400 text-sm">
@@ -87,10 +97,13 @@ export default function LoginPage() {
               />
             </div>
 
-            <button
+            <AnimatedButton
               type="submit"
               disabled={loading}
-              className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition"
+              variant="gradient"
+              ripple
+              glow
+              className="w-full flex items-center justify-center gap-2"
             >
               {loading ? 'Signing in...' : (
                 <>
@@ -98,7 +111,7 @@ export default function LoginPage() {
                   Sign In
                 </>
               )}
-            </button>
+            </AnimatedButton>
           </form>
 
           <div className="mt-6 text-center text-sm text-slate-400">
@@ -107,7 +120,7 @@ export default function LoginPage() {
               Sign up
             </Link>
           </div>
-        </div>
+        </AnimatedCard>
 
         {/* Back to Home */}
         <div className="mt-6 text-center">
@@ -115,7 +128,7 @@ export default function LoginPage() {
             ← Back to home
           </Link>
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }

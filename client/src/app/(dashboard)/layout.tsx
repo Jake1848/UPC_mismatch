@@ -11,6 +11,8 @@ import {
   Menu,
   X
 } from 'lucide-react'
+import { CommandPalette } from '@/components/ui/command-palette'
+import { ScrollProgress } from '@/components/ui/scroll-progress'
 
 export default function DashboardLayout({
   children,
@@ -178,6 +180,10 @@ export default function DashboardLayout({
       <div className="pt-16">
         {children}
       </div>
+
+      {/* Global UI Components */}
+      <ScrollProgress />
+      <CommandPalette />
     </div>
   )
 }

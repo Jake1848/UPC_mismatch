@@ -16,6 +16,9 @@ import {
   AlertTriangle
 } from 'lucide-react'
 import Link from 'next/link'
+import { AnimatedCard } from '@/components/ui/animated-card'
+import { AnimatedButton } from '@/components/ui/animated-button'
+import { motion } from 'framer-motion'
 
 interface Stats {
   totalAnalyses: number
@@ -132,79 +135,109 @@ export default function DashboardPage() {
       <div className="container mx-auto px-6 py-8">
         {/* Quick Actions */}
         <div className="grid md:grid-cols-2 gap-4 mb-8">
-          <Link
-            href="/upload"
-            className="bg-gradient-to-br from-blue-900/20 to-blue-600/20 border border-blue-800/50 rounded-xl p-6 hover:border-blue-700 transition group"
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
           >
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-xl font-bold text-white mb-2">Upload Files</h3>
-                <p className="text-slate-400">Upload CSV or Excel files to detect conflicts</p>
-              </div>
-              <Upload className="w-12 h-12 text-blue-500 group-hover:scale-110 transition" />
-            </div>
-          </Link>
+            <AnimatedCard variant="gradient" hover3D glowOnHover>
+              <Link href="/upload" className="block p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold text-white mb-2">Upload Files</h3>
+                    <p className="text-slate-400">Upload CSV or Excel files to detect conflicts</p>
+                  </div>
+                  <Upload className="w-12 h-12 text-blue-400" />
+                </div>
+              </Link>
+            </AnimatedCard>
+          </motion.div>
 
-          <Link
-            href="/conflicts"
-            className="bg-gradient-to-br from-orange-900/20 to-orange-600/20 border border-orange-800/50 rounded-xl p-6 hover:border-orange-700 transition group"
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
           >
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-xl font-bold text-white mb-2">View Conflicts</h3>
-                <p className="text-slate-400">Review and resolve detected conflicts</p>
-              </div>
-              <Search className="w-12 h-12 text-orange-500 group-hover:scale-110 transition" />
-            </div>
-          </Link>
+            <AnimatedCard variant="gradient" hover3D glowOnHover>
+              <Link href="/conflicts" className="block p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold text-white mb-2">View Conflicts</h3>
+                    <p className="text-slate-400">Review and resolve detected conflicts</p>
+                  </div>
+                  <Search className="w-12 h-12 text-orange-400" />
+                </div>
+              </Link>
+            </AnimatedCard>
+          </motion.div>
         </div>
 
         {/* Stats Grid */}
         <div className="grid md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-2">
+          <AnimatedCard variant="glass" hover3D className="p-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="flex items-center justify-between mb-2"
+            >
               <FileText className="w-8 h-8 text-blue-500" />
               <span className="text-3xl font-bold text-white">
                 {recentAnalyses.length > 0 ? recentAnalyses.length : 0}
               </span>
-            </div>
+            </motion.div>
             <div className="text-sm text-slate-400">Recent Analyses</div>
-          </div>
+          </AnimatedCard>
 
-          <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-2">
+          <AnimatedCard variant="glass" hover3D className="p-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="flex items-center justify-between mb-2"
+            >
               <AlertCircle className="w-8 h-8 text-orange-500" />
               <span className="text-3xl font-bold text-white">
                 {activeConflicts.toLocaleString()}
               </span>
-            </div>
+            </motion.div>
             <div className="text-sm text-slate-400">Active Conflicts</div>
-          </div>
+          </AnimatedCard>
 
-          <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-2">
+          <AnimatedCard variant="glass" hover3D className="p-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="flex items-center justify-between mb-2"
+            >
               <CheckCircle className="w-8 h-8 text-green-500" />
               <span className="text-3xl font-bold text-white">
                 {stats?.byStatus.RESOLVED.toLocaleString() || 0}
               </span>
-            </div>
+            </motion.div>
             <div className="text-sm text-slate-400">Resolved</div>
-          </div>
+          </AnimatedCard>
 
-          <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-2">
+          <AnimatedCard variant="glass" hover3D className="p-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="flex items-center justify-between mb-2"
+            >
               <BarChart3 className="w-8 h-8 text-purple-500" />
               <span className="text-3xl font-bold text-white">
                 {totalRows.toLocaleString()}
               </span>
-            </div>
+            </motion.div>
             <div className="text-sm text-slate-400">Records Processed</div>
-          </div>
+          </AnimatedCard>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6 mb-8">
           {/* Severity Breakdown */}
-          <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
+          <AnimatedCard variant="glass" hover3D className="p-6">
             <h3 className="text-lg font-bold text-white mb-4">Conflicts by Severity</h3>
             {stats ? (
               <div className="space-y-3">
@@ -291,10 +324,10 @@ export default function DashboardPage() {
             ) : (
               <p className="text-slate-400 text-sm">No data available</p>
             )}
-          </div>
+          </AnimatedCard>
 
           {/* Type Breakdown */}
-          <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
+          <AnimatedCard variant="glass" hover3D className="p-6">
             <h3 className="text-lg font-bold text-white mb-4">Conflicts by Type</h3>
             {stats ? (
               <div className="space-y-3">
@@ -322,11 +355,11 @@ export default function DashboardPage() {
             ) : (
               <p className="text-slate-400 text-sm">No data available</p>
             )}
-          </div>
+          </AnimatedCard>
         </div>
 
         {/* Recent Analyses */}
-        <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
+        <AnimatedCard variant="glass" hover3D className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-white">Recent Analyses</h3>
             <Link
@@ -375,16 +408,19 @@ export default function DashboardPage() {
             <div className="text-center py-12">
               <FileText className="w-16 h-16 text-slate-600 mx-auto mb-4" />
               <p className="text-slate-400 mb-4">No analyses yet</p>
-              <Link
-                href="/upload"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition"
+              <AnimatedButton
+                variant="gradient"
+                ripple
+                glow
+                onClick={() => router.push('/upload')}
+                className="inline-flex items-center gap-2"
               >
                 <Upload className="w-5 h-5" />
                 Upload Your First File
-              </Link>
+              </AnimatedButton>
             </div>
           )}
-        </div>
+        </AnimatedCard>
       </div>
     </div>
   )

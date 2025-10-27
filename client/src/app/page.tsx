@@ -1,78 +1,129 @@
+'use client'
+
 import Link from 'next/link'
 import { ArrowRight, BarChart3, FileCheck, Zap } from 'lucide-react'
+import { AnimatedButton } from '@/components/ui/animated-button'
+import { AnimatedCard } from '@/components/ui/animated-card'
+import { GradientMesh } from '@/components/ui/particle-background'
+import { motion } from 'framer-motion'
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 relative overflow-hidden">
+      <GradientMesh />
       {/* Hero Section */}
-      <div className="container mx-auto px-4 py-20">
+      <div className="container mx-auto px-4 py-20 relative z-10">
         <nav className="flex justify-between items-center mb-20">
           <div className="text-2xl font-bold text-white">
             UPC Resolver
           </div>
-          <Link
-            href="/login"
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+          <AnimatedButton
+            variant="primary"
+            ripple
+            onClick={() => window.location.href = '/login'}
           >
             Sign In
-          </Link>
+          </AnimatedButton>
         </nav>
 
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-6xl font-bold text-white mb-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="max-w-4xl mx-auto text-center"
+        >
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+            className="text-6xl font-bold text-white mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
+          >
             Enterprise UPC Conflict Resolution
-          </h1>
-          <p className="text-xl text-slate-300 mb-12">
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.8 }}
+            className="text-xl text-slate-300 mb-12"
+          >
             Detect, analyze, and resolve UPC conflicts across your entire inventory with AI-powered precision
-          </p>
+          </motion.p>
 
-          <div className="flex gap-4 justify-center">
-            <Link
-              href="/register"
-              className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold flex items-center gap-2 transition"
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.8 }}
+            className="flex gap-4 justify-center"
+          >
+            <AnimatedButton
+              variant="gradient"
+              ripple
+              glow
+              onClick={() => window.location.href = '/register'}
+              className="px-8 py-4 flex items-center gap-2"
             >
               Get Started <ArrowRight className="w-5 h-5" />
-            </Link>
-            <Link
-              href="/demo"
-              className="px-8 py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-semibold transition"
+            </AnimatedButton>
+            <AnimatedButton
+              variant="secondary"
+              ripple
+              onClick={() => window.location.href = '/demo'}
+              className="px-8 py-4"
             >
               View Demo
-            </Link>
-          </div>
-        </div>
+            </AnimatedButton>
+          </motion.div>
+        </motion.div>
 
         {/* Features */}
         <div className="grid md:grid-cols-3 gap-8 mt-32">
-          <div className="bg-slate-900/50 backdrop-blur border border-slate-800 rounded-xl p-8">
-            <FileCheck className="w-12 h-12 text-blue-500 mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">
-              File Processing
-            </h3>
-            <p className="text-slate-400">
-              Upload and process large CSV/Excel files with intelligent conflict detection
-            </p>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.6 }}
+          >
+            <AnimatedCard variant="glass" hover3D glowOnHover className="p-8 h-full">
+              <FileCheck className="w-12 h-12 text-blue-400 mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-2">
+                File Processing
+              </h3>
+              <p className="text-slate-400">
+                Upload and process large CSV/Excel files with intelligent conflict detection
+              </p>
+            </AnimatedCard>
+          </motion.div>
 
-          <div className="bg-slate-900/50 backdrop-blur border border-slate-800 rounded-xl p-8">
-            <BarChart3 className="w-12 h-12 text-blue-500 mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">
-              Analytics Dashboard
-            </h3>
-            <p className="text-slate-400">
-              Real-time insights and visualizations for conflict trends and resolution rates
-            </p>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.0, duration: 0.6 }}
+          >
+            <AnimatedCard variant="glass" hover3D glowOnHover className="p-8 h-full">
+              <BarChart3 className="w-12 h-12 text-purple-400 mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-2">
+                Analytics Dashboard
+              </h3>
+              <p className="text-slate-400">
+                Real-time insights and visualizations for conflict trends and resolution rates
+              </p>
+            </AnimatedCard>
+          </motion.div>
 
-          <div className="bg-slate-900/50 backdrop-blur border border-slate-800 rounded-xl p-8">
-            <Zap className="w-12 h-12 text-blue-500 mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">
-              AI-Powered
-            </h3>
-            <p className="text-slate-400">
-              Machine learning algorithms automatically suggest optimal conflict resolutions
-            </p>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.2, duration: 0.6 }}
+          >
+            <AnimatedCard variant="glass" hover3D glowOnHover className="p-8 h-full">
+              <Zap className="w-12 h-12 text-pink-400 mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-2">
+                AI-Powered
+              </h3>
+              <p className="text-slate-400">
+                Machine learning algorithms automatically suggest optimal conflict resolutions
+              </p>
+            </AnimatedCard>
+          </motion.div>
         </div>
       </div>
 
