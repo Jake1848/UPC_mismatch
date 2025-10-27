@@ -409,19 +409,16 @@ export default function UploadPage() {
                 Drag and drop files here, or click to browse
               </p>
 
-              <AnimatedButton
-                variant="gradient"
-                ripple
-                glow
+              <label
+                htmlFor="file-upload"
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold cursor-pointer hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
                 onClick={() => {
                   console.log('📤 [UPLOAD PAGE] ======= SELECT FILES BUTTON CLICKED =======')
-                  document.getElementById('file-upload')?.click()
                 }}
-                className="inline-flex items-center"
               >
                 <FileSpreadsheet className="w-5 h-5 mr-2" />
                 Select Files
-              </AnimatedButton>
+              </label>
 
               <p className="text-sm text-slate-500 mt-4">
                 CSV, XLSX, XLS • Unlimited file size • Processed locally in your browser
