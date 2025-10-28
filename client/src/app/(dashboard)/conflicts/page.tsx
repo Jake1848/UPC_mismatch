@@ -20,10 +20,12 @@ interface Conflict {
   type: string
   severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
   description: string
-  suggestedFix: string | null
+  suggestedFix?: string | null
   status: 'PENDING' | 'IN_PROGRESS' | 'RESOLVED' | 'IGNORED'
-  relatedRows: number[]
-  createdAt: string
+  relatedRows?: number[]
+  affectedRows?: number[]  // Added for compatibility with upload page
+  createdAt?: string
+  data?: any
   analysis: {
     id: string
     fileName: string
@@ -74,37 +76,122 @@ export default function ConflictsPage() {
 
   const fetchConflicts = async () => {
     try {
-      const token = localStorage.getItem('token')
-      if (!token) {
-        router.push('/auth/login')
-        return
+      console.log('🔍 [CONFLICTS PAGE] Fetching conflicts from localStorage...')
+
+      // Get analysisId from URL if present
+      const urlParams = new URLSearchParams(window.location.search)
+      const analysisId = urlParams.get('analysisId')
+      console.log('🔍 [CONFLICTS PAGE] Analysis ID from URL:', analysisId)
+
+      // Get all analyses from localStorage
+      const savedAnalyses = JSON.parse(localStorage.getItem('upc_analyses') || '[]')
+      console.log('🔍 [CONFLICTS PAGE] Found analyses:', savedAnalyses.length)
+
+      let allConflicts: any[] = []
+
+      if (analysisId) {
+        // Show conflicts from specific analysis
+        const analysis = savedAnalyses.find((a: any) => a.id === analysisId)
+        if (analysis) {
+          console.log('🔍 [CONFLICTS PAGE] Found specific analysis:', analysis.fileName)
+          allConflicts = analysis.conflicts.map((c: any) => ({
+            ...c,
+            status: 'PENDING',
+            analysis: {
+              id: analysis.id,
+              fileName: analysis.fileName,
+              createdAt: analysis.createdAt
+            }
+          }))
+        }
+      } else {
+        // Show all conflicts from all analyses
+        savedAnalyses.forEach((analysis: any) => {
+          if (analysis.conflicts) {
+            analysis.conflicts.forEach((conflict: any) => {
+              allConflicts.push({
+                ...conflict,
+                status: 'PENDING',
+                analysis: {
+                  id: analysis.id,
+                  fileName: analysis.fileName,
+                  createdAt: analysis.createdAt
+                }
+              })
+            })
+          }
+        })
       }
 
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: '20',
-        ...(search && { search }),
-        ...(selectedSeverities.length && { severity: selectedSeverities.join(',') }),
-        ...(selectedTypes.length && { type: selectedTypes.join(',') }),
-        ...(selectedStatuses.length && { status: selectedStatuses.join(',') })
-      })
+      console.log('🔍 [CONFLICTS PAGE] Total conflicts found:', allConflicts.length)
 
-      const res = await fetch(`/api/conflicts?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
+      // Apply filters
+      let filteredConflicts = allConflicts
+
+      // Search filter
+      if (search) {
+        filteredConflicts = filteredConflicts.filter(c =>
+          c.upc?.toLowerCase().includes(search.toLowerCase()) ||
+          c.description?.toLowerCase().includes(search.toLowerCase())
+        )
+      }
+
+      // Severity filter
+      if (selectedSeverities.length > 0) {
+        filteredConflicts = filteredConflicts.filter(c =>
+          selectedSeverities.includes(c.severity)
+        )
+      }
+
+      // Type filter
+      if (selectedTypes.length > 0) {
+        filteredConflicts = filteredConflicts.filter(c =>
+          selectedTypes.includes(c.type)
+        )
+      }
+
+      // Status filter
+      if (selectedStatuses.length > 0) {
+        filteredConflicts = filteredConflicts.filter(c =>
+          selectedStatuses.includes(c.status || 'PENDING')
+        )
+      }
+
+      console.log('🔍 [CONFLICTS PAGE] After filters:', filteredConflicts.length)
+
+      // Calculate statistics
+      const stats = {
+        bySeverity: {
+          LOW: filteredConflicts.filter(c => c.severity === 'LOW').length,
+          MEDIUM: filteredConflicts.filter(c => c.severity === 'MEDIUM').length,
+          HIGH: filteredConflicts.filter(c => c.severity === 'HIGH').length,
+          CRITICAL: filteredConflicts.filter(c => c.severity === 'CRITICAL').length
+        },
+        byStatus: {
+          PENDING: filteredConflicts.filter(c => (c.status || 'PENDING') === 'PENDING').length,
+          IN_PROGRESS: filteredConflicts.filter(c => c.status === 'IN_PROGRESS').length,
+          RESOLVED: filteredConflicts.filter(c => c.status === 'RESOLVED').length,
+          IGNORED: filteredConflicts.filter(c => c.status === 'IGNORED').length
         }
-      })
+      }
 
-      if (!res.ok) throw new Error('Failed to fetch conflicts')
+      // Pagination
+      const limit = 20
+      const totalCount = filteredConflicts.length
+      const totalPagesCount = Math.ceil(totalCount / limit)
+      const start = (page - 1) * limit
+      const end = start + limit
+      const paginatedConflicts = filteredConflicts.slice(start, end)
 
-      const data = await res.json()
-      setConflicts(data.conflicts)
-      setStatistics(data.statistics)
-      setTotal(data.pagination.total)
-      setTotalPages(data.pagination.pages)
+      setConflicts(paginatedConflicts)
+      setStatistics(stats)
+      setTotal(totalCount)
+      setTotalPages(totalPagesCount)
       setLoading(false)
+
+      console.log('🔍 [CONFLICTS PAGE] ✅ Displaying', paginatedConflicts.length, 'conflicts')
     } catch (error: any) {
-      console.error('Failed to fetch conflicts:', error)
+      console.error('❌ Failed to fetch conflicts:', error)
       setLoading(false)
     }
   }
@@ -387,9 +474,9 @@ export default function ConflictsPage() {
                     <div className="flex items-center gap-4 text-xs text-slate-400">
                       <span>File: {conflict.analysis.fileName}</span>
                       <span>•</span>
-                      <span>Rows: {conflict.relatedRows.join(', ')}</span>
+                      <span>Rows: {(conflict.affectedRows || conflict.relatedRows || []).slice(0, 5).join(', ')}{(conflict.affectedRows || conflict.relatedRows || []).length > 5 ? '...' : ''}</span>
                       <span>•</span>
-                      <span>{new Date(conflict.createdAt).toLocaleDateString()}</span>
+                      <span>{new Date(conflict.analysis.createdAt).toLocaleDateString()}</span>
                       {conflict.assignedTo && (
                         <>
                           <span>•</span>
