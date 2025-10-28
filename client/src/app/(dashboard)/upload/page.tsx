@@ -109,26 +109,94 @@ export default function UploadPage() {
       return
     }
 
+    // Process each file immediately - add to state and start processing
     for (const file of validFiles) {
       const fileId = Math.random().toString(36).substring(7)
       const uploadedFile: UploadedFile = {
         file,
         id: fileId,
-        status: 'ready',
-        progress: 0
+        status: 'processing',  // Start as processing immediately
+        progress: 10
       }
 
       console.log('📤 [UPLOAD PAGE] ✅ Adding file to queue:', file.name, 'ID:', fileId)
-      console.log('📤 [UPLOAD PAGE] Current uploadedFiles state before update:', uploadedFiles.length)
+      console.log('📤 [UPLOAD PAGE] Starting immediate analysis...')
 
-      setUploadedFiles(prev => {
-        const newState = [...prev, uploadedFile]
-        console.log('📤 [UPLOAD PAGE] New uploadedFiles state:', newState.length)
-        return newState
-      })
+      setUploadedFiles(prev => [...prev, uploadedFile])
+
+      // Start processing immediately with file object
+      processFileDirectly(fileId, file)
     }
 
-    console.log('📤 [UPLOAD PAGE] ✅ All files added to queue')
+    console.log('📤 [UPLOAD PAGE] ✅ All files added and processing started')
+  }
+
+  const processFileDirectly = async (fileId: string, file: File) => {
+    console.log('═══════════════════════════════════════════════════')
+    console.log('📤 [UPLOAD PAGE] ======= PROCESSING FILE DIRECTLY =======')
+    console.log('📤 [UPLOAD PAGE] File:', file.name)
+    console.log('📤 [UPLOAD PAGE] Size:', (file.size / 1024).toFixed(2), 'KB')
+    console.log('📤 [UPLOAD PAGE] Type:', file.type)
+    console.log('═══════════════════════════════════════════════════')
+
+    try {
+      const extension = file.name.split('.').pop()?.toLowerCase()
+
+      if (extension === 'csv') {
+        console.log('📤 [UPLOAD PAGE] Parsing CSV file...')
+        Papa.parse(file, {
+          header: true,
+          skipEmptyLines: true,
+          complete: (results) => {
+            console.log('📤 [UPLOAD PAGE] CSV parsed:', results.data.length, 'rows')
+            processData(fileId, results.data as UPCRow[], file.name)
+          },
+          error: (error) => {
+            console.error('📤 [UPLOAD PAGE] ❌ CSV parse error:', error)
+            setUploadedFiles(prev => prev.map(f =>
+              f.id === fileId ? { ...f, status: 'error', error: error.message } : f
+            ))
+          }
+        })
+      } else if (extension === 'xlsx' || extension === 'xls') {
+        console.log('📤 [UPLOAD PAGE] Parsing Excel file...')
+        const reader = new FileReader()
+
+        reader.onload = (e) => {
+          try {
+            const data = new Uint8Array(e.target?.result as ArrayBuffer)
+            const workbook = XLSX.read(data, { type: 'array' })
+
+            const firstSheetName = workbook.SheetNames[0]
+            const worksheet = workbook.Sheets[firstSheetName]
+
+            const jsonData = XLSX.utils.sheet_to_json(worksheet)
+            console.log('📤 [UPLOAD PAGE] Excel parsed:', jsonData.length, 'rows')
+
+            processData(fileId, jsonData as UPCRow[], file.name)
+          } catch (error: any) {
+            console.error('📤 [UPLOAD PAGE] ❌ Excel parse error:', error)
+            setUploadedFiles(prev => prev.map(f =>
+              f.id === fileId ? { ...f, status: 'error', error: error.message } : f
+            ))
+          }
+        }
+
+        reader.onerror = (error) => {
+          console.error('📤 [UPLOAD PAGE] ❌ File read error:', error)
+          setUploadedFiles(prev => prev.map(f =>
+            f.id === fileId ? { ...f, status: 'error', error: 'Failed to read file' } : f
+          ))
+        }
+
+        reader.readAsArrayBuffer(file)
+      }
+    } catch (error: any) {
+      console.error('📤 [UPLOAD PAGE] ❌ Processing error:', error)
+      setUploadedFiles(prev => prev.map(f =>
+        f.id === fileId ? { ...f, status: 'error', error: error.message } : f
+      ))
+    }
   }
 
   const processFile = async (fileId: string) => {
