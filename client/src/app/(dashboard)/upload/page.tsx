@@ -44,27 +44,51 @@ export default function UploadPage() {
   const [dragActive, setDragActive] = useState(false)
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
 
-  console.log('📤 [UPLOAD PAGE] Rendered', { fileCount: uploadedFiles.length })
+  console.log('═══════════════════════════════════════════════════')
+  console.log('📤 [UPLOAD PAGE] ======= COMPONENT RENDERED =======')
+  console.log('📤 [UPLOAD PAGE] Timestamp:', new Date().toISOString())
+  console.log('📤 [UPLOAD PAGE] Uploaded files count:', uploadedFiles.length)
+  console.log('📤 [UPLOAD PAGE] Files:', uploadedFiles.map(f => f.file.name))
+  console.log('📤 [UPLOAD PAGE] Drag active:', dragActive)
+  console.log('═══════════════════════════════════════════════════')
 
   const handleDrag = useCallback((e: React.DragEvent) => {
+    console.log('🖱️ [DRAG EVENT]', e.type.toUpperCase())
     e.preventDefault()
     e.stopPropagation()
     if (e.type === "dragenter" || e.type === "dragover") {
+      console.log('✅ Setting drag active = true')
       setDragActive(true)
     } else if (e.type === "dragleave") {
+      console.log('❌ Setting drag active = false')
       setDragActive(false)
     }
   }, [])
 
   const handleDrop = useCallback((e: React.DragEvent) => {
+    console.log('═══════════════════════════════════════════════════')
+    console.log('📤 [UPLOAD PAGE] ======= DROP EVENT =======')
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
 
+    console.log('📤 [UPLOAD PAGE] DataTransfer object:', e.dataTransfer)
+    console.log('📤 [UPLOAD PAGE] Files in drop:', e.dataTransfer.files)
+    console.log('📤 [UPLOAD PAGE] Files count:', e.dataTransfer.files?.length)
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      console.log('📤 [UPLOAD PAGE] Files dropped:', e.dataTransfer.files.length)
-      handleFiles(Array.from(e.dataTransfer.files))
+      const fileArray = Array.from(e.dataTransfer.files)
+      console.log('📤 [UPLOAD PAGE] ✅ Files dropped successfully:', fileArray.map(f => f.name))
+      console.log('📤 [UPLOAD PAGE] File details:', fileArray.map(f => ({
+        name: f.name,
+        size: f.size,
+        type: f.type
+      })))
+      handleFiles(fileArray)
+    } else {
+      console.error('❌ [UPLOAD PAGE] No files in drop event!')
     }
+    console.log('═══════════════════════════════════════════════════')
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -159,23 +183,67 @@ export default function UploadPage() {
           }
         })
       } else if (extension === 'xlsx' || extension === 'xls') {
-        console.log('📤 [UPLOAD PAGE] Parsing Excel file...')
+        console.log('═══════════════════════════════════════════════════')
+        console.log('📊 [EXCEL PARSER] ======= START EXCEL PARSING =======')
+        console.log('📊 [EXCEL PARSER] File name:', file.name)
+        console.log('📊 [EXCEL PARSER] File size:', (file.size / 1024 / 1024).toFixed(2), 'MB')
+        console.log('📊 [EXCEL PARSER] Extension:', extension)
+
         const reader = new FileReader()
 
+        reader.onloadstart = () => {
+          console.log('📊 [EXCEL PARSER] FileReader started reading...')
+        }
+
+        reader.onprogress = (e) => {
+          if (e.lengthComputable) {
+            const percentComplete = (e.loaded / e.total) * 100
+            console.log(`📊 [EXCEL PARSER] Reading progress: ${percentComplete.toFixed(1)}%`)
+          }
+        }
+
         reader.onload = (e) => {
+          console.log('📊 [EXCEL PARSER] FileReader onload triggered')
+          console.log('📊 [EXCEL PARSER] Result type:', typeof e.target?.result)
+          const arrayBuffer = e.target?.result as ArrayBuffer
+          console.log('📊 [EXCEL PARSER] Result size:', arrayBuffer?.byteLength || 0, 'bytes')
+
           try {
+            console.log('📊 [EXCEL PARSER] Converting to Uint8Array...')
             const data = new Uint8Array(e.target?.result as ArrayBuffer)
+            console.log('📊 [EXCEL PARSER] ✅ Uint8Array created, length:', data.length)
+
+            console.log('📊 [EXCEL PARSER] Calling XLSX.read...')
+            const startTime = performance.now()
             const workbook = XLSX.read(data, { type: 'array' })
+            const parseTime = performance.now() - startTime
+            console.log('📊 [EXCEL PARSER] ✅ XLSX.read completed in', parseTime.toFixed(2), 'ms')
+            console.log('📊 [EXCEL PARSER] Workbook sheets:', workbook.SheetNames)
 
             const firstSheetName = workbook.SheetNames[0]
-            const worksheet = workbook.Sheets[firstSheetName]
+            console.log('📊 [EXCEL PARSER] Using first sheet:', firstSheetName)
 
+            const worksheet = workbook.Sheets[firstSheetName]
+            console.log('📊 [EXCEL PARSER] Worksheet object:', worksheet ? 'Valid' : 'Invalid')
+
+            console.log('📊 [EXCEL PARSER] Converting sheet to JSON...')
+            const jsonStartTime = performance.now()
             const jsonData = XLSX.utils.sheet_to_json(worksheet)
-            console.log('📤 [UPLOAD PAGE] Excel parsed:', jsonData.length, 'rows')
+            const jsonTime = performance.now() - jsonStartTime
+            console.log('📊 [EXCEL PARSER] ✅ JSON conversion completed in', jsonTime.toFixed(2), 'ms')
+            console.log('📊 [EXCEL PARSER] Total rows:', jsonData.length)
+            console.log('📊 [EXCEL PARSER] First row sample:', jsonData[0])
+            console.log('📊 [EXCEL PARSER] Column headers:', Object.keys(jsonData[0] || {}))
+            console.log('═══════════════════════════════════════════════════')
 
             processData(fileId, jsonData as UPCRow[], file.name)
           } catch (error: any) {
-            console.error('📤 [UPLOAD PAGE] ❌ Excel parse error:', error)
+            console.error('═══════════════════════════════════════════════════')
+            console.error('❌ [EXCEL PARSER] PARSE ERROR!')
+            console.error('❌ [EXCEL PARSER] Error name:', error.name)
+            console.error('❌ [EXCEL PARSER] Error message:', error.message)
+            console.error('❌ [EXCEL PARSER] Error stack:', error.stack)
+            console.error('═══════════════════════════════════════════════════')
             setUploadedFiles(prev => prev.map(f =>
               f.id === fileId ? { ...f, status: 'error', error: error.message } : f
             ))
@@ -183,12 +251,16 @@ export default function UploadPage() {
         }
 
         reader.onerror = (error) => {
-          console.error('📤 [UPLOAD PAGE] ❌ File read error:', error)
+          console.error('═══════════════════════════════════════════════════')
+          console.error('❌ [EXCEL PARSER] FILE READ ERROR!')
+          console.error('❌ [EXCEL PARSER] Error:', error)
+          console.error('═══════════════════════════════════════════════════')
           setUploadedFiles(prev => prev.map(f =>
             f.id === fileId ? { ...f, status: 'error', error: 'Failed to read file' } : f
           ))
         }
 
+        console.log('📊 [EXCEL PARSER] Starting FileReader.readAsArrayBuffer...')
         reader.readAsArrayBuffer(file)
       }
     } catch (error: any) {
@@ -282,13 +354,33 @@ export default function UploadPage() {
   }
 
   const processData = (fileId: string, data: UPCRow[], fileName: string) => {
+    console.log('═══════════════════════════════════════════════════')
+    console.log('🔄 [PROCESS DATA] ======= START PROCESSING =======')
+    console.log('🔄 [PROCESS DATA] File ID:', fileId)
+    console.log('🔄 [PROCESS DATA] File name:', fileName)
+    console.log('🔄 [PROCESS DATA] Data rows:', data.length)
+    console.log('🔄 [PROCESS DATA] Memory usage:', (performance as any).memory ? {
+      usedJSHeapSize: ((performance as any).memory.usedJSHeapSize / 1024 / 1024).toFixed(2) + ' MB',
+      totalJSHeapSize: ((performance as any).memory.totalJSHeapSize / 1024 / 1024).toFixed(2) + ' MB'
+    } : 'Not available')
+
     setUploadedFiles(prev => prev.map(f =>
       f.id === fileId ? { ...f, progress: 40 } : f
     ))
 
     // Detect conflicts
+    console.log('🔄 [PROCESS DATA] Calling detectConflicts...')
+    const conflictStartTime = performance.now()
     const conflicts = detectConflicts(data)
-    console.log('📤 [UPLOAD PAGE] Conflicts detected:', conflicts.length)
+    const conflictTime = performance.now() - conflictStartTime
+    console.log('🔄 [PROCESS DATA] ✅ Conflict detection completed in', conflictTime.toFixed(2), 'ms')
+    console.log('🔄 [PROCESS DATA] Total conflicts found:', conflicts.length)
+    console.log('🔄 [PROCESS DATA] Conflict types:', {
+      DUPLICATE_UPC: conflicts.filter(c => c.type === 'DUPLICATE_UPC').length,
+      INVALID_FORMAT: conflicts.filter(c => c.type === 'INVALID_FORMAT').length,
+      MISSING_DATA: conflicts.filter(c => c.type === 'MISSING_DATA').length,
+      PRICE_MISMATCH: conflicts.filter(c => c.type === 'PRICE_MISMATCH').length
+    })
 
     setUploadedFiles(prev => prev.map(f =>
       f.id === fileId ? { ...f, progress: 70 } : f
