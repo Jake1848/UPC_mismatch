@@ -294,23 +294,49 @@ export default function UploadPage() {
       f.id === fileId ? { ...f, progress: 70 } : f
     ))
 
-    // Save analysis to localStorage
+    // Save analysis to localStorage - ONLY CONFLICTS AND METADATA, NO FULL DATA
     const analysisId = 'analysis_' + Date.now()
     const savedAnalyses = JSON.parse(localStorage.getItem('upc_analyses') || '[]')
+
+    // Get conflict summary statistics
+    const conflictTypes = {
+      DUPLICATE_UPC: conflicts.filter(c => c.type === 'DUPLICATE_UPC').length,
+      INVALID_FORMAT: conflicts.filter(c => c.type === 'INVALID_FORMAT').length,
+      MISSING_DATA: conflicts.filter(c => c.type === 'MISSING_DATA').length,
+      PRICE_MISMATCH: conflicts.filter(c => c.type === 'PRICE_MISMATCH').length
+    }
+
     const newAnalysis = {
       id: analysisId,
       fileName,
       status: 'COMPLETED',
       conflictsFound: conflicts.length,
       totalRows: data.length,
-      conflicts,
-      data,
+      conflictTypes,
+      conflicts: conflicts.slice(0, 1000), // Limit to first 1000 conflicts to save space
+      // NO FULL DATA - removed to prevent localStorage quota exceeded
       createdAt: new Date().toISOString()
     }
 
     savedAnalyses.push(newAnalysis)
-    localStorage.setItem('upc_analyses', JSON.stringify(savedAnalyses))
-    console.log('📤 [UPLOAD PAGE] ✅ Analysis saved:', analysisId)
+
+    // Keep only last 50 analyses to prevent quota issues
+    if (savedAnalyses.length > 50) {
+      savedAnalyses.shift()
+    }
+
+    try {
+      localStorage.setItem('upc_analyses', JSON.stringify(savedAnalyses))
+      console.log('📤 [UPLOAD PAGE] ✅ Analysis saved:', analysisId)
+      console.log('📤 [UPLOAD PAGE] Total rows:', data.length, 'Conflicts:', conflicts.length)
+      console.log('📤 [UPLOAD PAGE] Storage: Saved conflicts only (no full data)')
+    } catch (error) {
+      console.error('❌ Failed to save to localStorage:', error)
+      // Clear old analyses and retry
+      localStorage.removeItem('upc_analyses')
+      localStorage.setItem('upc_analyses', JSON.stringify([newAnalysis]))
+      console.log('📤 [UPLOAD PAGE] Cleared old data and saved new analysis')
+    }
 
     setUploadedFiles(prev => prev.map(f =>
       f.id === fileId
