@@ -404,8 +404,8 @@ export default function UploadPage() {
       {/* Main Content */}
       <div className="container mx-auto px-6 py-8">
         <div className="max-w-4xl mx-auto">
-          {/* Upload Zone */}
-          <AnimatedCard variant="glass" className="p-12">
+          {/* Upload Zone - SIMPLIFIED WITHOUT AnimatedCard */}
+          <div className="bg-slate-900/50 backdrop-blur border border-slate-800 rounded-2xl p-12">
             <div
               className={`relative border-2 border-dashed rounded-xl p-12 text-center transition-all ${
                 dragActive
@@ -439,7 +439,7 @@ export default function UploadPage() {
               <button
                 type="button"
                 onClick={(e) => {
-                  console.log('═══════════════════════════════════════════════════')
+                  console.log('🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥')
                   console.log('📤 [UPLOAD PAGE] ======= BUTTON CLICKED =======')
                   console.log('📤 [UPLOAD PAGE] Event:', e)
                   console.log('📤 [UPLOAD PAGE] Looking for input element...')
@@ -453,19 +453,24 @@ export default function UploadPage() {
                   } else {
                     console.error('❌ Input element not found!')
                   }
-                  console.log('═══════════════════════════════════════════════════')
+                  console.log('🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥')
+                }}
+                style={{
+                  position: 'relative',
+                  zIndex: 9999,
+                  pointerEvents: 'auto'
                 }}
                 className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold cursor-pointer hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
               >
                 <FileSpreadsheet className="w-5 h-5 mr-2" />
-                Select Files (Click Me!)
+                🚀 SELECT FILES 🚀
               </button>
 
               <p className="text-sm text-slate-500 mt-4">
                 CSV, XLSX, XLS • Unlimited file size • Processed locally in your browser
               </p>
             </div>
-          </AnimatedCard>
+          </div>
 
           {/* Uploaded Files List */}
           {uploadedFiles.length > 0 && (
