@@ -924,6 +924,26 @@
                     <div class="stat-label">Max Duplication</div>
                     <div class="stat-sublabel">Most occurrences of one UPC</div>
                 </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, rgba(245, 101, 101, 0.1), rgba(237, 137, 54, 0.1));">
+                    <div class="stat-card-header">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #f56565, #ed8936);">
+                            <i class="fas fa-skull"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="criticalCount" style="color: #f56565;">0</div>
+                    <div class="stat-label" style="color: #f56565;">Critical Issues</div>
+                    <div class="stat-sublabel">50+ occurrences</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, rgba(237, 137, 54, 0.1), rgba(66, 153, 225, 0.1));">
+                    <div class="stat-card-header">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #ed8936, #4299e1);">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="highCount" style="color: #ed8936;">0</div>
+                    <div class="stat-label" style="color: #ed8936;">High Priority</div>
+                    <div class="stat-sublabel">11-50 occurrences</div>
+                </div>
             </div>
 
             <div class="charts-container">
@@ -931,7 +951,7 @@
                     <div class="chart-header">
                         <div class="chart-title">
                             <i class="fas fa-chart-pie"></i>
-                            <span>Duplicate Distribution</span>
+                            <span>Severity Distribution</span>
                         </div>
                     </div>
                     <div class="chart-container">
@@ -942,11 +962,33 @@
                     <div class="chart-header">
                         <div class="chart-title">
                             <i class="fas fa-chart-bar"></i>
-                            <span>Top Duplicate UPCs</span>
+                            <span>Top 10 Duplicate UPCs</span>
                         </div>
                     </div>
                     <div class="chart-container">
                         <canvas id="chart2"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Duplication Trend</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chart3"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-area"></i>
+                            <span>Severity Breakdown</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chart4"></canvas>
                     </div>
                 </div>
             </div>
@@ -1319,15 +1361,35 @@
                 maxDuplication = Math.max(maxDuplication, data.count);
             });
 
-            duplicateUPCsData.sort((a, b) => b.count - a.count);
+            // Sort by severity first, then by count
+            const severityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+            duplicateUPCsData.sort((a, b) => {
+                if (severityOrder[a.severity] !== severityOrder[b.severity]) {
+                    return severityOrder[a.severity] - severityOrder[b.severity];
+                }
+                return b.count - a.count;
+            });
 
-            console.log('✅ [ANALYSIS] Found', duplicateUPCsData.length, 'duplicates');
+            console.log('✅ [ANALYSIS] Found', duplicateUPCsData.length, 'duplicates (sorted by severity)');
+
+            // Calculate severity counts
+            const criticalCount = duplicateUPCsData.filter(d => d.severity === 'critical').length;
+            const highCount = duplicateUPCsData.filter(d => d.severity === 'high').length;
+
+            console.log('📊 [SEVERITY BREAKDOWN]', {
+                critical: criticalCount,
+                high: highCount,
+                medium: duplicateUPCsData.filter(d => d.severity === 'medium').length,
+                low: duplicateUPCsData.filter(d => d.severity === 'low').length
+            });
 
             // Update stats
             animateValue('totalRecords', 0, items.length, 1500);
             animateValue('uniqueUPCs', 0, uniqueUPCs.size, 1500);
             animateValue('duplicateUPCs', 0, duplicateUPCsData.length, 1500);
             animateValue('maxDuplication', 0, maxDuplication, 1500);
+            animateValue('criticalCount', 0, criticalCount, 1500);
+            animateValue('highCount', 0, highCount, 1500);
 
             // Update tables
             updateDuplicateTable();
@@ -1551,6 +1613,170 @@
                             borderColor: gridColor,
                             borderWidth: 1,
                             cornerRadius: 8
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+
+            // Chart 3: Duplication Trend (Line chart showing distribution)
+            const ctx3 = document.getElementById('chart3').getContext('2d');
+
+            // Group duplicates by count ranges
+            const trendData = {};
+            duplicateUPCsData.forEach(item => {
+                const range = Math.floor(item.count / 10) * 10;
+                const label = `${range}-${range + 9}`;
+                trendData[label] = (trendData[label] || 0) + 1;
+            });
+
+            const trendLabels = Object.keys(trendData).sort((a, b) => {
+                const aNum = parseInt(a.split('-')[0]);
+                const bNum = parseInt(b.split('-')[0]);
+                return aNum - bNum;
+            });
+
+            charts.chart3 = new Chart(ctx3, {
+                type: 'line',
+                data: {
+                    labels: trendLabels,
+                    datasets: [{
+                        label: 'Number of UPCs',
+                        data: trendLabels.map(label => trendData[label]),
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#667eea',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: gridColor,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: textColor,
+                                font: { size: 11 }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: textColor,
+                                font: { size: 11 },
+                                maxRotation: 45
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: isDark ? '#2d3748' : '#ffffff',
+                            titleColor: textColor,
+                            bodyColor: textColor,
+                            borderColor: gridColor,
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    return `UPCs in this range: ${context.parsed.y}`;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+
+            // Chart 4: Severity Breakdown (Horizontal bar chart)
+            const ctx4 = document.getElementById('chart4').getContext('2d');
+
+            const severityCounts = {
+                Critical: duplicateUPCsData.filter(d => d.severity === 'critical').length,
+                High: duplicateUPCsData.filter(d => d.severity === 'high').length,
+                Medium: duplicateUPCsData.filter(d => d.severity === 'medium').length,
+                Low: duplicateUPCsData.filter(d => d.severity === 'low').length
+            };
+
+            charts.chart4 = new Chart(ctx4, {
+                type: 'bar',
+                data: {
+                    labels: ['Critical', 'High', 'Medium', 'Low'],
+                    datasets: [{
+                        label: 'Number of Duplicates',
+                        data: Object.values(severityCounts),
+                        backgroundColor: ['#f56565', '#ed8936', '#4299e1', '#48bb78'],
+                        borderColor: ['#e53e3e', '#dd6b20', '#3182ce', '#38a169'],
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: {
+                                color: gridColor,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: textColor,
+                                font: { size: 11 }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: textColor,
+                                font: { size: 12, weight: 'bold' }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: isDark ? '#2d3748' : '#ffffff',
+                            titleColor: textColor,
+                            bodyColor: textColor,
+                            borderColor: gridColor,
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    const total = duplicateUPCsData.length;
+                                    const percentage = ((context.parsed.x / total) * 100).toFixed(1);
+                                    return `${context.parsed.x} duplicates (${percentage}%)`;
+                                }
+                            }
                         }
                     },
                     animation: {
