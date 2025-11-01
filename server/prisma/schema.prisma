@@ -38,6 +38,15 @@ model Organization {
   auditLogs    AuditLog[]
   integrations Integration[]
   webhooks     Webhook[]
+  products     Product[]
+  categories   ProductCategory[]
+  customAttributes CustomAttribute[]
+  mappingTemplates MappingTemplate[]
+  validationRules  ValidationRule[]
+  importJobs   ImportJob[]
+  workflows    Workflow[]
+  apiKeys      ApiKey[]
+  monitoringJobs MonitoringJob[]
 
   @@map("organizations")
 }
@@ -83,6 +92,8 @@ model User {
   assignedConflicts Conflict[] @relation("AssignedTo")
   resolvedConflicts Conflict[] @relation("ResolvedBy")
   auditLogs        AuditLog[]
+  mappingTemplates MappingTemplate[]
+  importJobs       ImportJob[]
 
   @@map("users")
 }
@@ -399,3 +410,235 @@ model ApiKey {
 
   @@map("api_keys")
 }
+
+// ========================================
+// PREMIUM SAAS FEATURES
+// ========================================
+
+// Product Information Management (PIM)
+model Product {
+  id          String   @id @default(cuid())
+  sku         String
+  upc         String?
+  name        String
+  description String?  @db.Text
+  category    String?
+  brand       String?
+  price       Decimal? @db.Decimal(10,2)
+  cost        Decimal? @db.Decimal(10,2)
+  quantity    Int?
+  weight      Decimal? @db.Decimal(10,2)
+  dimensions  String?
+  images      String?  @db.Text // JSON array of image URLs
+  customAttributes String? @db.Text // JSON object of custom attributes
+  status      ProductStatus @default(ACTIVE)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Multi-tenant
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, sku])
+  @@index([organizationId, status])
+  @@index([organizationId, category])
+  @@index([organizationId, brand])
+  @@index([upc])
+  @@map("products")
+}
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+  DRAFT
+  ARCHIVED
+}
+
+// Product Categories
+model ProductCategory {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  parentId    String?
+  slug        String
+  order       Int     @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Multi-tenant
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, slug])
+  @@index([organizationId, parentId])
+  @@map("product_categories")
+}
+
+// Custom Attribute Definitions
+model CustomAttribute {
+  id           String   @id @default(cuid())
+  name         String   // Internal name (e.g., "color")
+  label        String   // Display label (e.g., "Product Color")
+  type         AttributeType
+  options      String?  @db.Text // JSON array for select/multiselect
+  required     Boolean  @default(false)
+  defaultValue String?  @db.Text // JSON value
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Multi-tenant
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, name])
+  @@map("custom_attributes")
+}
+
+enum AttributeType {
+  TEXT
+  NUMBER
+  BOOLEAN
+  DATE
+  SELECT
+  MULTISELECT
+  TEXTAREA
+}
+
+// Column Mapping Templates
+model MappingTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  fileType    String   // csv, excel, json, xml
+  mappings    String   @db.Text // JSON array of column mappings
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Multi-tenant
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@index([organizationId, fileType])
+  @@map("mapping_templates")
+}
+
+// Validation Rules
+model ValidationRule {
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  field        String   // Field to validate
+  ruleType     RuleType
+  config       String   @db.Text // JSON configuration
+  errorMessage String
+  severity     RuleSeverity @default(ERROR)
+  enabled      Boolean  @default(true)
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Multi-tenant
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, enabled])
+  @@index([organizationId, field])
+  @@map("validation_rules")
+}
+
+enum RuleType {
+  REGEX
+  RANGE
+  REQUIRED
+  UNIQUE
+  LENGTH
+  CUSTOM
+  FORMAT
+}
+
+enum RuleSeverity {
+  ERROR
+  WARNING
+  INFO
+}
+
+// File Import Jobs
+model ImportJob {
+  id           String      @id @default(cuid())
+  fileName     String
+  fileUrl      String
+  fileType     String
+  status       ImportStatus @default(PENDING)
+  progress     Int         @default(0)
+  
+  // Results
+  totalRows    Int         @default(0)
+  validRows    Int         @default(0)
+  invalidRows  Int         @default(0)
+  importedRows Int         @default(0)
+  
+  errors       String?     @db.Text // JSON array of errors
+  warnings     String?     @db.Text // JSON array of warnings
+  
+  // Mapping used
+  mappingTemplateId String?
+  
+  startedAt    DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  // Multi-tenant
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  userId       String
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@index([organizationId, status])
+  @@index([organizationId, createdAt])
+  @@map("import_jobs")
+}
+
+enum ImportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+// Workflow Automation
+model Workflow {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  trigger     String   // JSON configuration
+  actions     String   @db.Text // JSON array of actions
+  conditions  String?  @db.Text // JSON conditions
+  enabled     Boolean  @default(true)
+  
+  // Execution stats
+  executionCount Int    @default(0)
+  lastExecutedAt DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Multi-tenant
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, enabled])
+  @@map("workflows")
+}
+
+
+

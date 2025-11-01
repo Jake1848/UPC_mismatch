@@ -28,6 +28,10 @@ import reportRoutes from './routes/reports'
 import adminRoutes from './routes/admin'
 import healthRoutes from './routes/health'
 import aiRoutes from './routes/ai'
+import fileUploadRoutes from './routes/fileUpload'
+import mappingRoutes from './routes/mappings'
+import validationRoutes from './routes/validation'
+import pimRoutes from './routes/pim'
 
 // Import services
 import { setupWebSocket } from './services/websocket'
@@ -158,6 +162,10 @@ app.use(`${API_VERSION}/billing`, authMiddleware, organizationMiddleware, billin
 app.use(`${API_VERSION}/integrations`, authMiddleware, organizationMiddleware, integrationRoutes)
 app.use(`${API_VERSION}/reports`, authMiddleware, organizationMiddleware, reportRoutes)
 app.use(`${API_VERSION}/ai`, authMiddleware, organizationMiddleware, aiRoutes)
+app.use(`${API_VERSION}/files`, authMiddleware, organizationMiddleware, fileUploadRoutes)
+app.use(`${API_VERSION}/mappings`, authMiddleware, organizationMiddleware, mappingRoutes)
+app.use(`${API_VERSION}/validation`, authMiddleware, organizationMiddleware, validationRoutes)
+app.use(`${API_VERSION}/pim`, authMiddleware, organizationMiddleware, pimRoutes)
 
 // Admin routes (require admin role)
 app.use(`${API_VERSION}/admin`, authMiddleware, adminRoutes)
