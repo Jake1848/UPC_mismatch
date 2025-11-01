@@ -5,6 +5,13 @@ export interface User {
   role: 'admin' | 'user'
 }
 
+export interface Organization {
+  id: string
+  name: string
+  plan: 'free' | 'pro' | 'enterprise'
+  createdAt: string
+}
+
 export interface Analysis {
   id: string
   fileName: string

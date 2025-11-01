@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
-import { User } from '../types'
+import { User, Organization } from '../types'
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
+  const [organization, setOrganization] = useState<Organization | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -15,7 +16,15 @@ export function useAuth() {
       role: 'admin'
     }
 
+    const mockOrganization: Organization = {
+      id: '1',
+      name: 'Demo Organization',
+      plan: 'pro',
+      createdAt: new Date().toISOString()
+    }
+
     setUser(mockUser)
+    setOrganization(mockOrganization)
     setLoading(false)
   }, [])
 
@@ -29,7 +38,14 @@ export function useAuth() {
         name: 'Demo User',
         role: 'admin'
       }
+      const mockOrganization: Organization = {
+        id: '1',
+        name: 'Demo Organization',
+        plan: 'pro',
+        createdAt: new Date().toISOString()
+      }
       setUser(mockUser)
+      setOrganization(mockOrganization)
       setError(null)
     } catch (err) {
       setError('Login failed')
@@ -41,10 +57,12 @@ export function useAuth() {
 
   const logout = async () => {
     setUser(null)
+    setOrganization(null)
   }
 
   return {
     user,
+    organization,
     loading,
     error,
     login,
