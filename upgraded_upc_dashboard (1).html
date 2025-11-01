@@ -1,0 +1,1945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPC Duplicate Analysis Dashboard - Enhanced</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            /* Light theme colors */
+            --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --bg-secondary: rgba(255, 255, 255, 0.95);
+            --bg-tertiary: rgba(255, 255, 255, 0.8);
+            --text-primary: #1a202c;
+            --text-secondary: #4a5568;
+            --text-muted: #718096;
+            --border-color: #e2e8f0;
+            --accent-primary: #667eea;
+            --accent-secondary: #764ba2;
+            --success-color: #48bb78;
+            --warning-color: #ed8936;
+            --error-color: #f56565;
+            --info-color: #4299e1;
+            --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --shadow-heavy: 0 20px 40px rgba(0, 0, 0, 0.15);
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+        }
+
+        [data-theme="dark"] {
+            /* Dark theme colors */
+            --bg-primary: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            --bg-secondary: rgba(26, 32, 44, 0.95);
+            --bg-tertiary: rgba(45, 55, 72, 0.8);
+            --text-primary: #f7fafc;
+            --text-secondary: #e2e8f0;
+            --text-muted: #a0aec0;
+            --border-color: #4a5568;
+            --accent-primary: #90cdf4;
+            --accent-secondary: #b794f6;
+            --success-color: #68d391;
+            --warning-color: #f6ad55;
+            --error-color: #fc8181;
+            --info-color: #63b3ed;
+            --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.4);
+            --shadow-heavy: 0 20px 40px rgba(0, 0, 0, 0.5);
+            --glass-bg: rgba(45, 55, 72, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            min-height: 100vh;
+            color: var(--text-primary);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Enhanced animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+            animation: morphing 20s ease-in-out infinite;
+            z-index: -2;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            z-index: -1;
+        }
+        
+        @keyframes morphing {
+            0%, 100% { 
+                transform: translate(0, 0) rotate(0deg) scale(1); 
+            }
+            25% { 
+                transform: translate(-30px, -30px) rotate(2deg) scale(1.1); 
+            }
+            50% { 
+                transform: translate(20px, -20px) rotate(-2deg) scale(0.9); 
+            }
+            75% { 
+                transform: translate(-20px, 30px) rotate(1deg) scale(1.05); 
+            }
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        /* Enhanced Header */
+        .header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-medium);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shimmer 6s infinite;
+            transform: rotate(45deg);
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .theme-toggle {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-light);
+        }
+
+        .theme-toggle i {
+            font-size: 1.2em;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle .active {
+            background: var(--accent-primary);
+            color: white;
+        }
+        
+        h1 {
+            font-size: clamp(2.5em, 5vw, 4em);
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            letter-spacing: -2px;
+            line-height: 1.1;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.3em;
+            font-weight: 400;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        /* Enhanced Upload Area */
+        .upload-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-medium);
+            transition: all 0.3s ease;
+        }
+
+        .upload-container:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-heavy);
+        }
+        
+        .upload {
+            border: 3px dashed var(--border-color);
+            border-radius: 20px;
+            padding: 60px 40px;
+            text-align: center;
+            cursor: pointer;
+            background: var(--glass-bg);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .upload:hover::before {
+            left: 100%;
+        }
+        
+        .upload:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: var(--shadow-heavy);
+        }
+        
+        .upload.dragover {
+            background: var(--accent-primary);
+            border-color: var(--accent-secondary);
+            transform: scale(1.05);
+            color: white;
+        }
+        
+        .upload-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+            color: var(--accent-primary);
+        }
+
+        .upload.dragover .upload-icon {
+            color: white;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .upload-text {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .upload.dragover .upload-text {
+            color: white;
+        }
+        
+        .upload-subtext {
+            color: var(--text-muted);
+            font-size: 1em;
+            font-weight: 500;
+        }
+
+        .upload.dragover .upload-subtext {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Enhanced Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+            animation: staggeredFadeIn 0.8s ease-out;
+        }
+        
+        @keyframes staggeredFadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(40px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        .stat-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: var(--shadow-medium);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--accent-primary);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .stat-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            box-shadow: var(--shadow-light);
+        }
+
+        .stat-trend {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .trend-up {
+            color: var(--success-color);
+        }
+
+        .trend-down {
+            color: var(--error-color);
+        }
+        
+        .stat-value {
+            font-size: 3em;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            line-height: 1;
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 1em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        
+        .stat-sublabel {
+            color: var(--text-muted);
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        /* Enhanced Charts */
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: var(--shadow-medium);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-heavy);
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .chart-title {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chart-control-btn {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+
+        .chart-control-btn:hover {
+            background: var(--accent-primary);
+            color: white;
+        }
+        
+        .chart-container {
+            height: 350px;
+            position: relative;
+        }
+
+        /* Enhanced Table */
+        .table-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: var(--shadow-medium);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .table-title {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-container {
+            position: relative;
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+        
+        .filter-input {
+            padding: 12px 15px 12px 45px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 0.95em;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            width: 250px;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: scale(1.02);
+        }
+        
+        .items-info {
+            padding: 10px 18px;
+            background: var(--accent-primary);
+            color: white;
+            border-radius: 12px;
+            font-size: 0.9em;
+            font-weight: 600;
+            box-shadow: var(--shadow-light);
+        }
+        
+        .export-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow-light);
+        }
+        
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        /* Enhanced Tabs */
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 25px;
+            background: var(--glass-bg);
+            padding: 8px;
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            border-radius: 12px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .tab:hover {
+            color: var(--accent-primary);
+            background: var(--glass-bg);
+        }
+        
+        .tab.active {
+            color: white;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            box-shadow: var(--shadow-light);
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 16px;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border-color);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            padding: 18px 15px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        td {
+            padding: 18px 15px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-size: 0.95em;
+            background: var(--bg-secondary);
+        }
+        
+        tbody tr {
+            transition: all 0.2s ease;
+        }
+        
+        tbody tr:hover {
+            background: var(--glass-bg);
+            transform: scale(1.01);
+            box-shadow: var(--shadow-light);
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge-critical {
+            background: var(--error-color);
+            color: white;
+        }
+        
+        .badge-high {
+            background: var(--warning-color);
+            color: white;
+        }
+        
+        .badge-medium {
+            background: var(--info-color);
+            color: white;
+        }
+        
+        .badge-low {
+            background: var(--success-color);
+            color: white;
+        }
+
+        /* Enhanced Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .pagination button {
+            padding: 10px 16px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            min-width: 44px;
+        }
+        
+        .pagination button:hover:not(:disabled) {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-light);
+        }
+        
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .pagination button.active {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border-color: transparent;
+            box-shadow: var(--shadow-light);
+        }
+
+        /* Loading States */
+        .spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(102, 126, 234, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--accent-primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-secondary);
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 4px;
+            background: var(--border-color);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 2px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        
+        /* Hide initially */
+        #results {
+            display: none;
+        }
+
+        /* Notification System */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: var(--shadow-medium);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+            max-width: 350px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .notification-icon {
+            font-size: 1.2em;
+        }
+
+        .notification-text {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            font-size: 1.1em;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 4px;
+        }
+
+        .notification-close:hover {
+            color: var(--text-primary);
+        }
+
+        .notification.success {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .notification.error {
+            border-left: 4px solid var(--error-color);
+        }
+
+        .notification.info {
+            border-left: 4px solid var(--info-color);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2.5em;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+            
+            .stat-card {
+                padding: 25px;
+            }
+            
+            .chart-card,
+            .table-container,
+            .upload-container {
+                padding: 25px 20px;
+            }
+            
+            .header-controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+            
+            .filter-input {
+                width: 100%;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat-value {
+                font-size: 2.5em;
+            }
+            
+            .upload {
+                padding: 40px 20px;
+            }
+            
+            .upload-text {
+                font-size: 1.3em;
+            }
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div class="header-top">
+                    <div></div>
+                    <div class="theme-toggle" onclick="toggleTheme()">
+                        <i class="fas fa-sun active" id="lightIcon"></i>
+                        <i class="fas fa-moon" id="darkIcon"></i>
+                    </div>
+                </div>
+                <h1><i class="fas fa-search-plus"></i> UPC Duplicate Analysis</h1>
+                <p class="subtitle">Advanced analytics dashboard for identifying UPCs linked to multiple products and products with multiple UPCs</p>
+            </div>
+        </div>
+        
+        <div class="upload-container">
+            <div class="upload" id="uploadArea">
+                <input type="file" id="file" style="display:none" accept=".xlsx,.xls">
+                <div class="upload-icon">
+                    <i class="fas fa-file-excel"></i>
+                </div>
+                <div class="upload-text">Drop your UPC Excel file here</div>
+                <div class="upload-subtext">or click to browse • .xlsx and .xls supported • Max 50MB</div>
+                <div class="progress-container" id="progressContainer" style="display: none;">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="results">
+            <div class="stats-grid">
+                <div class="stat-card" onclick="highlightSection('total')">
+                    <div class="stat-card-header">
+                        <div class="stat-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <div class="stat-trend trend-up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+0%</span>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="totalRecords">0</div>
+                    <div class="stat-label">Total Records</div>
+                    <div class="stat-sublabel">All UPC-Product mappings</div>
+                </div>
+                <div class="stat-card" onclick="highlightSection('upcs')">
+                    <div class="stat-card-header">
+                        <div class="stat-icon">
+                            <i class="fas fa-barcode"></i>
+                        </div>
+                        <div class="stat-trend trend-up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+0%</span>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="uniqueUPCs">0</div>
+                    <div class="stat-label">Unique UPCs</div>
+                    <div class="stat-sublabel">Distinct barcode identifiers</div>
+                </div>
+                <div class="stat-card" onclick="highlightSection('products')">
+                    <div class="stat-card-header">
+                        <div class="stat-icon">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        <div class="stat-trend trend-up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+0%</span>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="uniqueProducts">0</div>
+                    <div class="stat-label">Unique Products</div>
+                    <div class="stat-sublabel">Distinct product identifiers</div>
+                </div>
+                <div class="stat-card" onclick="highlightSection('duplicates')">
+                    <div class="stat-card-header">
+                        <div class="stat-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-trend trend-down">
+                            <i class="fas fa-arrow-down"></i>
+                            <span>-0%</span>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="duplicateUPCs">0</div>
+                    <div class="stat-label">Duplicate UPCs</div>
+                    <div class="stat-sublabel">UPCs with multiple products</div>
+                </div>
+                <div class="stat-card" onclick="highlightSection('multi')">
+                    <div class="stat-card-header">
+                        <div class="stat-icon">
+                            <i class="fas fa-clone"></i>
+                        </div>
+                        <div class="stat-trend trend-down">
+                            <i class="fas fa-arrow-down"></i>
+                            <span>-0%</span>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="productsMultiUPC">0</div>
+                    <div class="stat-label">Multi-UPC Products</div>
+                    <div class="stat-sublabel">Products with multiple UPCs</div>
+                </div>
+                <div class="stat-card" onclick="highlightSection('severity')">
+                    <div class="stat-card-header">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-trend trend-up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+0%</span>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="maxDuplication">0</div>
+                    <div class="stat-label">Max Duplication</div>
+                    <div class="stat-sublabel">Most products per UPC</div>
+                </div>
+            </div>
+            
+            <div class="charts-container">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Duplicate Distribution</span>
+                        </div>
+                        <div class="chart-controls">
+                            <button class="chart-control-btn" onclick="refreshChart('chart1')">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button class="chart-control-btn" onclick="exportChart('chart1')">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chart1"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Top Duplicate UPCs</span>
+                        </div>
+                        <div class="chart-controls">
+                            <button class="chart-control-btn" onclick="refreshChart('chart2')">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button class="chart-control-btn" onclick="exportChart('chart2')">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chart2"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <div class="table-header">
+                    <div class="table-title">
+                        <i class="fas fa-table"></i>
+                        <span>Duplicate Analysis Details</span>
+                    </div>
+                    <div class="header-controls">
+                        <div class="search-container">
+                            <i class="fas fa-search"></i>
+                            <input type="text" class="filter-input" id="searchInput" placeholder="Search UPC or Product..." onkeyup="filterTable()">
+                        </div>
+                        <div class="items-info" id="itemsInfo">Showing 0 items</div>
+                        <button class="export-btn" onclick="exportData()">
+                            <i class="fas fa-download"></i>
+                            <span>Export All</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('duplicateUPCs')">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Duplicate UPCs
+                    </button>
+                    <button class="tab" onclick="switchTab('multiUPCProducts')">
+                        <i class="fas fa-clone"></i>
+                        Multi-UPC Products
+                    </button>
+                    <button class="tab" onclick="switchTab('allMappings')">
+                        <i class="fas fa-list"></i>
+                        All Mappings
+                    </button>
+                </div>
+                
+                <div id="duplicateUPCs" class="tab-content active">
+                    <div class="table-wrapper">
+                        <table id="duplicateTable">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>UPC</th>
+                                    <th>Product Count</th>
+                                    <th>Product IDs</th>
+                                    <th>Locations</th>
+                                    <th>Severity</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div id="multiUPCProducts" class="tab-content">
+                    <div class="table-wrapper">
+                        <table id="multiUPCTable">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Product ID</th>
+                                    <th>UPC Count</th>
+                                    <th>UPCs</th>
+                                    <th>Locations</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div id="allMappings" class="tab-content">
+                    <div class="table-wrapper">
+                        <table id="allTable">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Product ID</th>
+                                    <th>Warehouse</th>
+                                    <th>UPC</th>
+                                    <th>Location</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="pagination" id="pagination"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer"></div>
+    
+    <script>
+        // Global variables
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('file');
+        let globalData = [];
+        let duplicateUPCsData = [];
+        let multiUPCProductsData = [];
+        let currentTab = 'duplicateUPCs';
+        let currentPage = 1;
+        let itemsPerPage = 50;
+        let charts = {};
+        
+        // Theme management
+        function toggleTheme() {
+            const body = document.body;
+            const lightIcon = document.getElementById('lightIcon');
+            const darkIcon = document.getElementById('darkIcon');
+            
+            if (body.getAttribute('data-theme') === 'light') {
+                body.setAttribute('data-theme', 'dark');
+                lightIcon.classList.remove('active');
+                darkIcon.classList.add('active');
+                localStorage.setItem('theme', 'dark');
+                showNotification('Dark theme activated', 'info');
+            } else {
+                body.setAttribute('data-theme', 'light');
+                darkIcon.classList.remove('active');
+                lightIcon.classList.add('active');
+                localStorage.setItem('theme', 'light');
+                showNotification('Light theme activated', 'info');
+            }
+            
+            // Update charts with new theme colors
+            if (Object.keys(charts).length > 0) {
+                setTimeout(() => {
+                    createCharts();
+                }, 100);
+            }
+        }
+
+        // Load saved theme
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            const body = document.body;
+            const lightIcon = document.getElementById('lightIcon');
+            const darkIcon = document.getElementById('darkIcon');
+            
+            body.setAttribute('data-theme', savedTheme);
+            
+            if (savedTheme === 'dark') {
+                lightIcon.classList.remove('active');
+                darkIcon.classList.add('active');
+            } else {
+                darkIcon.classList.remove('active');
+                lightIcon.classList.add('active');
+            }
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info', duration = 3000) {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            const icons = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-circle',
+                info: 'fas fa-info-circle'
+            };
+            
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <i class="${icons[type]} notification-icon"></i>
+                    <span class="notification-text">${message}</span>
+                    <button class="notification-close" onclick="this.parentElement.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            container.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            
+            // Auto remove
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.remove();
+                    }
+                }, 300);
+            }, duration);
+        }
+
+        // Upload handling with enhanced progress
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFile(e.target.files[0]);
+            }
+        });
+        
+        function handleFile(file) {
+            // Validate file size (50MB limit)
+            if (file.size > 50 * 1024 * 1024) {
+                showNotification('File size exceeds 50MB limit', 'error');
+                return;
+            }
+            
+            // Validate file type
+            const validTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+            if (!validTypes.includes(file.type)) {
+                showNotification('Please upload a valid Excel file (.xlsx or .xls)', 'error');
+                return;
+            }
+            
+            uploadArea.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Analyzing UPC duplicates...</div>
+                    <div class="progress-container" style="display: block; margin-top: 20px;">
+                        <div class="progress-bar" id="loadingProgressBar"></div>
+                    </div>
+                </div>
+            `;
+            
+            // Simulate progress
+            let progress = 0;
+            const progressBar = document.getElementById('loadingProgressBar');
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 90) progress = 90;
+                progressBar.style.width = progress + '%';
+            }, 200);
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(sheet, {header: 1});
+                    
+                    // Complete progress
+                    clearInterval(progressInterval);
+                    progressBar.style.width = '100%';
+                    
+                    setTimeout(() => {
+                        processData(jsonData);
+                        showNotification('File processed successfully!', 'success');
+                    }, 500);
+                } catch (error) {
+                    clearInterval(progressInterval);
+                    showNotification('Error processing file: ' + error.message, 'error');
+                    resetUpload();
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        
+        function resetUpload() {
+            uploadArea.innerHTML = `
+                <input type="file" id="file" style="display:none" accept=".xlsx,.xls">
+                <div class="upload-icon">
+                    <i class="fas fa-file-excel"></i>
+                </div>
+                <div class="upload-text">Drop your UPC Excel file here</div>
+                <div class="upload-subtext">or click to browse • .xlsx and .xls supported • Max 50MB</div>
+            `;
+            document.getElementById('file').addEventListener('change', (e) => {
+                if (e.target.files.length) handleFile(e.target.files[0]);
+            });
+        }
+        
+        function processData(rawData) {
+            // Skip header row if present
+            let startRow = 1;
+            if (rawData[0] && rawData[0][0] && typeof rawData[0][0] === 'string' && 
+                rawData[0][0].toLowerCase().includes('upc')) {
+                startRow = 2;
+            }
+            
+            const items = [];
+            
+            for (let i = startRow; i < rawData.length; i++) {
+                const row = rawData[i];
+                if (row && row.length >= 4) {
+                    items.push({
+                        prod_id: String(row[0] || '').trim(),
+                        whse_id: row[1] || '',
+                        upc: String(row[2] || '').trim(),
+                        location: row[3] || ''
+                    });
+                }
+            }
+            
+            globalData = items;
+            analyzeData(items);
+            resetUpload();
+        }
+        
+        function analyzeData(items) {
+            // Basic statistics
+            const uniqueUPCs = new Set(items.map(i => i.upc));
+            const uniqueProducts = new Set(items.map(i => i.prod_id));
+            
+            // Find duplicate UPCs (UPCs with multiple products)
+            const upcMap = {};
+            items.forEach(item => {
+                if (!upcMap[item.upc]) {
+                    upcMap[item.upc] = {
+                        products: new Set(),
+                        locations: new Set(),
+                        warehouses: new Set(),
+                        records: []
+                    };
+                }
+                upcMap[item.upc].products.add(item.prod_id);
+                upcMap[item.upc].locations.add(item.location);
+                upcMap[item.upc].warehouses.add(item.whse_id);
+                upcMap[item.upc].records.push(item);
+            });
+            
+            // Process duplicate UPCs
+            duplicateUPCsData = [];
+            let maxDuplication = 0;
+            
+            Object.entries(upcMap).forEach(([upc, data]) => {
+                const productCount = data.products.size;
+                if (productCount > 1) {
+                    duplicateUPCsData.push({
+                        upc: upc,
+                        productCount: productCount,
+                        products: Array.from(data.products),
+                        locations: Array.from(data.locations),
+                        warehouses: Array.from(data.warehouses),
+                        severity: productCount > 100 ? 'critical' : 
+                                 productCount > 10 ? 'high' : 
+                                 productCount > 5 ? 'medium' : 'low'
+                    });
+                }
+                maxDuplication = Math.max(maxDuplication, productCount);
+            });
+            
+            // Sort by product count
+            duplicateUPCsData.sort((a, b) => b.productCount - a.productCount);
+            
+            // Find products with multiple UPCs
+            const productMap = {};
+            items.forEach(item => {
+                if (!productMap[item.prod_id]) {
+                    productMap[item.prod_id] = {
+                        upcs: new Set(),
+                        locations: new Set(),
+                        warehouses: new Set()
+                    };
+                }
+                productMap[item.prod_id].upcs.add(item.upc);
+                productMap[item.prod_id].locations.add(item.location);
+                productMap[item.prod_id].warehouses.add(item.whse_id);
+            });
+            
+            multiUPCProductsData = [];
+            Object.entries(productMap).forEach(([prodId, data]) => {
+                const upcCount = data.upcs.size;
+                if (upcCount > 1) {
+                    multiUPCProductsData.push({
+                        prod_id: prodId,
+                        upcCount: upcCount,
+                        upcs: Array.from(data.upcs),
+                        locations: Array.from(data.locations),
+                        warehouses: Array.from(data.warehouses)
+                    });
+                }
+            });
+            
+            // Sort by UPC count
+            multiUPCProductsData.sort((a, b) => b.upcCount - a.upcCount);
+            
+            // Update statistics with animation
+            animateValue('totalRecords', 0, items.length, 1500);
+            animateValue('uniqueUPCs', 0, uniqueUPCs.size, 1500);
+            animateValue('uniqueProducts', 0, uniqueProducts.size, 1500);
+            animateValue('duplicateUPCs', 0, duplicateUPCsData.length, 1500);
+            animateValue('productsMultiUPC', 0, multiUPCProductsData.length, 1500);
+            animateValue('maxDuplication', 0, maxDuplication, 1500);
+            
+            // Update tables
+            updateTables();
+            
+            // Create charts
+            createCharts();
+            
+            // Show results with staggered animation
+            document.getElementById('results').style.display = 'block';
+            
+            // Animate cards with stagger
+            const cards = document.querySelectorAll('.stat-card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+        }
+        
+        function updateTables() {
+            if (currentTab === 'duplicateUPCs') {
+                updateDuplicateUPCsTable();
+            } else if (currentTab === 'multiUPCProducts') {
+                updateMultiUPCProductsTable();
+            } else {
+                updateAllMappingsTable();
+            }
+        }
+        
+        function updateDuplicateUPCsTable() {
+            const tbody = document.querySelector('#duplicateTable tbody');
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageData = duplicateUPCsData.slice(startIndex, endIndex);
+            
+            tbody.innerHTML = '';
+            pageData.forEach((item, index) => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${startIndex + index + 1}</td>
+                    <td><code>${item.upc}</code></td>
+                    <td><strong>${item.productCount}</strong></td>
+                    <td>${item.products.slice(0, 3).join(', ')}${item.products.length > 3 ? '...' : ''}</td>
+                    <td>${item.locations.slice(0, 2).join(', ')}${item.locations.length > 2 ? '...' : ''}</td>
+                    <td><span class="badge badge-${item.severity}">
+                        <i class="fas fa-${item.severity === 'critical' ? 'skull' : item.severity === 'high' ? 'exclamation-triangle' : item.severity === 'medium' ? 'exclamation' : 'check'}"></i>
+                        ${item.severity}
+                    </span></td>
+                `;
+            });
+            
+            updateItemsInfo(duplicateUPCsData.length);
+            updatePagination(duplicateUPCsData.length);
+        }
+        
+        function updateMultiUPCProductsTable() {
+            const tbody = document.querySelector('#multiUPCTable tbody');
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageData = multiUPCProductsData.slice(startIndex, endIndex);
+            
+            tbody.innerHTML = '';
+            pageData.forEach((item, index) => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${startIndex + index + 1}</td>
+                    <td><code>${item.prod_id}</code></td>
+                    <td><strong>${item.upcCount}</strong></td>
+                    <td>${item.upcs.slice(0, 3).join(', ')}${item.upcs.length > 3 ? '...' : ''}</td>
+                    <td>${item.locations.slice(0, 2).join(', ')}${item.locations.length > 2 ? '...' : ''}</td>
+                `;
+            });
+            
+            updateItemsInfo(multiUPCProductsData.length);
+            updatePagination(multiUPCProductsData.length);
+        }
+        
+        function updateAllMappingsTable() {
+            const tbody = document.querySelector('#allTable tbody');
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageData = globalData.slice(startIndex, endIndex);
+            
+            tbody.innerHTML = '';
+            pageData.forEach((item, index) => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${startIndex + index + 1}</td>
+                    <td><code>${item.prod_id}</code></td>
+                    <td>${item.whse_id}</td>
+                    <td><code>${item.upc}</code></td>
+                    <td>${item.location}</td>
+                `;
+            });
+            
+            updateItemsInfo(globalData.length);
+            updatePagination(globalData.length);
+        }
+        
+        function updateItemsInfo(totalItems) {
+            const startIndex = (currentPage - 1) * itemsPerPage + 1;
+            const endIndex = Math.min(currentPage * itemsPerPage, totalItems);
+            document.getElementById('itemsInfo').textContent = 
+                `Showing ${startIndex}-${endIndex} of ${totalItems.toLocaleString()} items`;
+        }
+        
+        function updatePagination(totalItems) {
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            const pagination = document.getElementById('pagination');
+            
+            pagination.innerHTML = '';
+            
+            // Previous button
+            const prevBtn = document.createElement('button');
+            prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => changePage(currentPage - 1);
+            pagination.appendChild(prevBtn);
+            
+            // Page numbers
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (endPage - startPage < maxVisiblePages - 1) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.textContent = i;
+                pageBtn.className = i === currentPage ? 'active' : '';
+                pageBtn.onclick = () => changePage(i);
+                pagination.appendChild(pageBtn);
+            }
+            
+            // Next button
+            const nextBtn = document.createElement('button');
+            nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => changePage(currentPage + 1);
+            pagination.appendChild(nextBtn);
+        }
+        
+        function changePage(page) {
+            currentPage = page;
+            updateTables();
+        }
+        
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            
+            currentTab = tabName;
+            currentPage = 1;
+            updateTables();
+        }
+        
+        function filterTable() {
+            const searchValue = document.getElementById('searchInput').value.toLowerCase();
+            const activeTable = document.querySelector('.tab-content.active table tbody');
+            
+            Array.from(activeTable.rows).forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchValue) ? '' : 'none';
+            });
+        }
+        
+        function animateValue(id, start, end, duration) {
+            const element = document.getElementById(id);
+            const range = end - start;
+            const increment = range / (duration / 16);
+            let current = start;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= end) {
+                    current = end;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current).toLocaleString();
+            }, 16);
+        }
+        
+        function createCharts() {
+            // Get current theme colors
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            const textColor = isDark ? '#f7fafc' : '#1a202c';
+            const gridColor = isDark ? '#4a5568' : '#e2e8f0';
+            
+            // Destroy existing charts
+            Object.values(charts).forEach(chart => {
+                if (chart) chart.destroy();
+            });
+            
+            // Duplicate distribution chart
+            const ctx1 = document.getElementById('chart1').getContext('2d');
+            
+            const distribution = {
+                'Low (2-5 products)': 0,
+                'Medium (6-10 products)': 0,
+                'High (11-50 products)': 0,
+                'Critical (50+ products)': 0
+            };
+            
+            duplicateUPCsData.forEach(item => {
+                const count = item.productCount;
+                if (count <= 5) distribution['Low (2-5 products)']++;
+                else if (count <= 10) distribution['Medium (6-10 products)']++;
+                else if (count <= 50) distribution['High (11-50 products)']++;
+                else distribution['Critical (50+ products)']++;
+            });
+            
+            charts.chart1 = new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(distribution),
+                    datasets: [{
+                        data: Object.values(distribution),
+                        backgroundColor: [
+                            '#48bb78',
+                            '#4299e1',
+                            '#ed8936',
+                            '#f56565'
+                        ],
+                        borderColor: [
+                            '#38a169',
+                            '#3182ce',
+                            '#dd6b20',
+                            '#e53e3e'
+                        ],
+                        borderWidth: 2,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: { size: 12 },
+                                color: textColor,
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: isDark ? '#2d3748' : '#ffffff',
+                            titleColor: textColor,
+                            bodyColor: textColor,
+                            borderColor: gridColor,
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            displayColors: true
+                        }
+                    },
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true,
+                        duration: 1000
+                    }
+                }
+            });
+            
+            // Top duplicate UPCs chart
+            const ctx2 = document.getElementById('chart2').getContext('2d');
+            const topDuplicates = duplicateUPCsData.slice(0, 10);
+            
+            charts.chart2 = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: topDuplicates.map(d => d.upc.length > 12 ? d.upc.substring(0, 12) + '...' : d.upc),
+                    datasets: [{
+                        label: 'Product Count',
+                        data: topDuplicates.map(d => d.productCount),
+                        backgroundColor: topDuplicates.map(d => {
+                            switch(d.severity) {
+                                case 'critical': return '#f56565';
+                                case 'high': return '#ed8936';
+                                case 'medium': return '#4299e1';
+                                default: return '#48bb78';
+                            }
+                        }),
+                        borderColor: topDuplicates.map(d => {
+                            switch(d.severity) {
+                                case 'critical': return '#e53e3e';
+                                case 'high': return '#dd6b20';
+                                case 'medium': return '#3182ce';
+                                default: return '#38a169';
+                            }
+                        }),
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: gridColor,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: textColor,
+                                font: { size: 11 }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: textColor,
+                                font: { size: 11 },
+                                maxRotation: 45
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: isDark ? '#2d3748' : '#ffffff',
+                            titleColor: textColor,
+                            bodyColor: textColor,
+                            borderColor: gridColor,
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    const item = topDuplicates[context.dataIndex];
+                                    return `Severity: ${item.severity.toUpperCase()}`;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+        
+        function refreshChart(chartId) {
+            if (charts[chartId]) {
+                charts[chartId].update('active');
+                showNotification('Chart refreshed', 'success', 2000);
+            }
+        }
+        
+        function exportChart(chartId) {
+            if (charts[chartId]) {
+                const url = charts[chartId].toBase64Image();
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${chartId}_${new Date().toISOString().split('T')[0]}.png`;
+                a.click();
+                showNotification('Chart exported successfully', 'success');
+            }
+        }
+        
+        function highlightSection(section) {
+            // Add visual feedback when clicking stat cards
+            event.currentTarget.style.transform = 'translateY(-8px) scale(1.05)';
+            setTimeout(() => {
+                event.currentTarget.style.transform = '';
+            }, 200);
+            
+            showNotification(`Viewing ${section} statistics`, 'info', 2000);
+        }
+        
+        function exportData() {
+            const csvContent = [
+                ['Type', 'UPC', 'Product ID', 'Product Count', 'UPC Count', 'Locations', 'Severity'],
+                ...duplicateUPCsData.map(item => [
+                    'Duplicate UPC',
+                    item.upc,
+                    item.products.join('; '),
+                    item.productCount,
+                    '',
+                    item.locations.join('; '),
+                    item.severity.toUpperCase()
+                ]),
+                ...multiUPCProductsData.map(item => [
+                    'Multi-UPC Product',
+                    item.upcs.join('; '),
+                    item.prod_id,
+                    '',
+                    item.upcCount,
+                    item.locations.join('; '),
+                    ''
+                ])
+            ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `upc_duplicate_analysis_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showNotification('Data exported successfully', 'success');
+        }
+        
+        // Initialize theme on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTheme();
+        });
+    </script>
+</body>
+</html>
+
