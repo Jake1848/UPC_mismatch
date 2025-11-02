@@ -229,9 +229,9 @@ export default function Dashboard() {
                               {getStatusIcon(analysis.status)}
                             </div>
                             <div>
-                              <p className="font-medium">{analysis.filename}</p>
+                              <p className="font-medium">{analysis.fileName}</p>
                               <p className="text-sm text-muted-foreground">
-                                {analysis.totalRecords?.toLocaleString()} rows • {formatDistanceToNow(new Date(analysis.createdAt))} ago
+                                {analysis.totalRows?.toLocaleString()} rows • {formatDistanceToNow(new Date(analysis.createdAt))} ago
                               </p>
                             </div>
                           </div>
