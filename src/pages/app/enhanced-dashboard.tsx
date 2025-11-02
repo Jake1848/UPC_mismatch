@@ -90,8 +90,8 @@ export default function EnhancedDashboard() {
   const loadDashboardData = async () => {
     try {
       const [analyses, conflicts] = await Promise.all([
-        analysisApi.getAll(),
-        conflictsApi.getAll()
+        analysisApi.getAnalyses({ limit: 10 }),
+        conflictsApi.getConflicts({ limit: 10 })
       ])
 
       setStats({
