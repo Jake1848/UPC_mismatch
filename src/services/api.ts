@@ -47,6 +47,11 @@ export const analysisApi = {
     return response.data.data
   },
 
+  getAnalyses: async (params?: { limit?: number; offset?: number }): Promise<Analysis[]> => {
+    const response = await apiClient.get<ApiResponse<Analysis[]>>('/analysis', { params })
+    return response.data.data
+  },
+
   getById: async (id: string): Promise<Analysis> => {
     const response = await apiClient.get<ApiResponse<Analysis>>(`/analysis/${id}`)
     return response.data.data
@@ -71,6 +76,11 @@ export const analysisApi = {
 export const conflictsApi = {
   getAll: async (analysisId?: string): Promise<Conflict[]> => {
     const params = analysisId ? { analysisId } : {}
+    const response = await apiClient.get<ApiResponse<Conflict[]>>('/conflicts', { params })
+    return response.data.data
+  },
+
+  getConflicts: async (params?: { limit?: number; offset?: number; analysisId?: string }): Promise<Conflict[]> => {
     const response = await apiClient.get<ApiResponse<Conflict[]>>('/conflicts', { params })
     return response.data.data
   },
