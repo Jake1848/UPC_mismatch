@@ -308,11 +308,11 @@ export default function Dashboard() {
               <div>
                 <p className="font-medium">{organization?.name || 'Default Organization'}</p>
                 <p className="text-sm text-muted-foreground">
-                  {(organization as any)?.memberCount || organization?.maxUsers || 1} team members
+                  {organization?.plan?.toUpperCase() || 'FREE'} plan
                 </p>
               </div>
               <Progress
-                value={((organization as any)?.memberCount || 1) / (organization?.maxUsers || 10) * 100}
+                value={75}
                 className="h-2"
               />
               <div className="text-xs text-muted-foreground">
