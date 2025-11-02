@@ -49,8 +49,10 @@ export const analysisApi = {
 
   getAnalyses: async (params?: { limit?: number; offset?: number }): Promise<AnalysesResponse> => {
     try {
+      console.log('[API] Fetching analyses with params:', params)
       const response = await apiClient.get<ApiResponse<Analysis[]>>('/analysis', { params })
       const items = response.data.data || []
+      console.log('[API] Fetched', items.length, 'analyses')
       const totalRows = items.reduce((sum, analysis) => sum + (analysis.totalRows || 0), 0)
       return {
         data: {
@@ -61,6 +63,7 @@ export const analysisApi = {
         }
       }
     } catch (error) {
+      console.error('[API] Error fetching analyses:', error)
       // Return empty response on error
       return {
         data: {
@@ -103,10 +106,12 @@ export const conflictsApi = {
 
   getConflicts: async (params?: { limit?: number; offset?: number; analysisId?: string }): Promise<ConflictsResponse> => {
     try {
+      console.log('[API] Fetching conflicts with params:', params)
       const response = await apiClient.get<ApiResponse<Conflict[]>>('/conflicts', { params })
       const items = response.data.data || []
       const pending = items.filter(c => c.status === 'pending').length
       const resolved = items.filter(c => c.status === 'resolved').length
+      console.log('[API] Fetched', items.length, 'conflicts (', pending, 'pending,', resolved, 'resolved)')
       return {
         data: {
           total: items.length,
@@ -116,6 +121,7 @@ export const conflictsApi = {
         }
       }
     } catch (error) {
+      console.error('[API] Error fetching conflicts:', error)
       // Return empty response on error
       return {
         data: {
