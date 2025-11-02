@@ -5,7 +5,7 @@ export default function Home() {
   const router = useRouter()
 
   useEffect(() => {
-    router.push('/app/ultra-dashboard')
+    router.push('/app/dashboard')
   }, [router])
 
   return (
