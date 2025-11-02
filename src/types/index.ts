@@ -45,3 +45,15 @@ export interface PaginatedResponse<T> {
   page: number
   pageSize: number
 }
+
+export interface AnalysesResponse {
+  data: Analysis[]
+  total: number
+}
+
+export interface ConflictsResponse {
+  data: Conflict[]
+  total: number
+  pending: number
+  resolved: number
+}
