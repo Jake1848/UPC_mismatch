@@ -316,7 +316,7 @@ export default function Dashboard() {
                 className="h-2"
               />
               <div className="text-xs text-muted-foreground">
-                {organization?.maxUsers || 10} user limit
+                Storage: 75% used
               </div>
             </CardContent>
           </Card>
