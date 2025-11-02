@@ -49,6 +49,7 @@ export function useWebSocket(url?: string) {
 
   return {
     connected,
+    connectionStatus: connected ? 'connected' : 'disconnected',
     messages,
     send,
     socket: socketRef.current
