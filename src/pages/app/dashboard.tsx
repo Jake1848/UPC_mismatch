@@ -236,8 +236,8 @@ export default function Dashboard() {
                             </div>
                           </div>
                           <div className="text-right">
-                            <Badge variant={analysis.duplicateUPCs > 0 ? 'destructive' : 'default'}>
-                              {analysis.duplicateUPCs} conflicts
+                            <Badge variant={analysis.duplicatesFound > 0 ? 'destructive' : 'default'}>
+                              {analysis.duplicatesFound} conflicts
                             </Badge>
                           </div>
                         </div>
