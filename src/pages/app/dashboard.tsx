@@ -272,7 +272,7 @@ export default function Dashboard() {
                             <div>
                               <p className="font-medium">UPC: {conflict.upc}</p>
                               <p className="text-sm text-muted-foreground">
-                                {conflict.type} • {formatDistanceToNow(new Date(conflict.createdAt))} ago
+                                {conflict.productName} • {conflict.occurrences} occurrences
                               </p>
                             </div>
                           </div>
