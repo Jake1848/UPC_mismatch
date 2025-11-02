@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { Analysis, Conflict, ApiResponse, PaginatedResponse } from '../types'
+import { Analysis, Conflict, ApiResponse, PaginatedResponse, AnalysesResponse, ConflictsResponse } from '../types'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'
 
@@ -47,9 +47,18 @@ export const analysisApi = {
     return response.data.data
   },
 
-  getAnalyses: async (params?: { limit?: number; offset?: number }): Promise<Analysis[]> => {
-    const response = await apiClient.get<ApiResponse<Analysis[]>>('/analysis', { params })
-    return response.data.data
+  getAnalyses: async (params?: { limit?: number; offset?: number }): Promise<AnalysesResponse> => {
+    try {
+      const response = await apiClient.get<ApiResponse<Analysis[]>>('/analysis', { params })
+      const data = response.data.data || []
+      return {
+        data,
+        total: data.length
+      }
+    } catch (error) {
+      // Return empty response on error
+      return { data: [], total: 0 }
+    }
   },
 
   getById: async (id: string): Promise<Analysis> => {
@@ -80,9 +89,22 @@ export const conflictsApi = {
     return response.data.data
   },
 
-  getConflicts: async (params?: { limit?: number; offset?: number; analysisId?: string }): Promise<Conflict[]> => {
-    const response = await apiClient.get<ApiResponse<Conflict[]>>('/conflicts', { params })
-    return response.data.data
+  getConflicts: async (params?: { limit?: number; offset?: number; analysisId?: string }): Promise<ConflictsResponse> => {
+    try {
+      const response = await apiClient.get<ApiResponse<Conflict[]>>('/conflicts', { params })
+      const data = response.data.data || []
+      const pending = data.filter(c => c.status === 'pending').length
+      const resolved = data.filter(c => c.status === 'resolved').length
+      return {
+        data,
+        total: data.length,
+        pending,
+        resolved
+      }
+    } catch (error) {
+      // Return empty response on error
+      return { data: [], total: 0, pending: 0, resolved: 0 }
+    }
   },
 
   getById: async (id: string): Promise<Conflict> => {
