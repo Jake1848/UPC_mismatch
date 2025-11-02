@@ -102,7 +102,7 @@ export default function EnhancedDashboard() {
         totalRows: analyses.data?.totalRows || 0,
         avgProcessingTime: analyses.data?.avgTime || 0,
         aiAccuracy: 94.5,
-        fraudDetected: conflicts.data?.fraudulent || 0
+        fraudDetected: 0
       })
     } catch (error) {
       console.error('Failed to load dashboard data:', error)
