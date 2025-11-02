@@ -8,6 +8,7 @@ export function useAuth() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    console.log('[Auth] Initializing authentication')
     // Mock authentication - in production, this would call your API
     const mockUser: User = {
       id: '1',
@@ -26,9 +27,11 @@ export function useAuth() {
     setUser(mockUser)
     setOrganization(mockOrganization)
     setLoading(false)
+    console.log('[Auth] User authenticated:', mockUser.email, '| Organization:', mockOrganization.name)
   }, [])
 
   const login = async (email: string, password: string) => {
+    console.log('[Auth] Login attempt for:', email)
     setLoading(true)
     try {
       // Mock login - in production, call your API
@@ -47,7 +50,9 @@ export function useAuth() {
       setUser(mockUser)
       setOrganization(mockOrganization)
       setError(null)
+      console.log('[Auth] Login successful for:', email)
     } catch (err) {
+      console.error('[Auth] Login failed:', err)
       setError('Login failed')
       throw err
     } finally {
@@ -56,8 +61,10 @@ export function useAuth() {
   }
 
   const logout = async () => {
+    console.log('[Auth] Logging out user')
     setUser(null)
     setOrganization(null)
+    console.log('[Auth] Logout complete')
   }
 
   return {
