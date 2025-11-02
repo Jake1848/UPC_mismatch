@@ -57,7 +57,7 @@ export const analysisApi = {
           total: items.length,
           totalRows,
           avgTime: 0, // Placeholder - would be calculated from actual data
-          items
+          data: items
         }
       }
     } catch (error) {
@@ -67,7 +67,7 @@ export const analysisApi = {
           total: 0,
           totalRows: 0,
           avgTime: 0,
-          items: []
+          data: []
         }
       }
     }
@@ -112,7 +112,7 @@ export const conflictsApi = {
           total: items.length,
           pending,
           resolved,
-          items
+          data: items
         }
       }
     } catch (error) {
@@ -122,7 +122,7 @@ export const conflictsApi = {
           total: 0,
           pending: 0,
           resolved: 0,
-          items: []
+          data: []
         }
       }
     }

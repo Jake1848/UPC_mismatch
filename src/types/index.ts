@@ -51,7 +51,7 @@ export interface AnalysesResponse {
     total: number
     totalRows: number
     avgTime: number
-    items: Analysis[]
+    data: Analysis[]
   }
 }
 
@@ -60,6 +60,6 @@ export interface ConflictsResponse {
     total: number
     pending: number
     resolved: number
-    items: Conflict[]
+    data: Conflict[]
   }
 }
