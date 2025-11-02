@@ -47,13 +47,19 @@ export interface PaginatedResponse<T> {
 }
 
 export interface AnalysesResponse {
-  data: Analysis[]
-  total: number
+  data: {
+    total: number
+    totalRows: number
+    avgTime: number
+    items: Analysis[]
+  }
 }
 
 export interface ConflictsResponse {
-  data: Conflict[]
-  total: number
-  pending: number
-  resolved: number
+  data: {
+    total: number
+    pending: number
+    resolved: number
+    items: Conflict[]
+  }
 }

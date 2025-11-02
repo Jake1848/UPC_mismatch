@@ -50,14 +50,26 @@ export const analysisApi = {
   getAnalyses: async (params?: { limit?: number; offset?: number }): Promise<AnalysesResponse> => {
     try {
       const response = await apiClient.get<ApiResponse<Analysis[]>>('/analysis', { params })
-      const data = response.data.data || []
+      const items = response.data.data || []
+      const totalRows = items.reduce((sum, analysis) => sum + (analysis.totalRows || 0), 0)
       return {
-        data,
-        total: data.length
+        data: {
+          total: items.length,
+          totalRows,
+          avgTime: 0, // Placeholder - would be calculated from actual data
+          items
+        }
       }
     } catch (error) {
       // Return empty response on error
-      return { data: [], total: 0 }
+      return {
+        data: {
+          total: 0,
+          totalRows: 0,
+          avgTime: 0,
+          items: []
+        }
+      }
     }
   },
 
@@ -92,18 +104,27 @@ export const conflictsApi = {
   getConflicts: async (params?: { limit?: number; offset?: number; analysisId?: string }): Promise<ConflictsResponse> => {
     try {
       const response = await apiClient.get<ApiResponse<Conflict[]>>('/conflicts', { params })
-      const data = response.data.data || []
-      const pending = data.filter(c => c.status === 'pending').length
-      const resolved = data.filter(c => c.status === 'resolved').length
+      const items = response.data.data || []
+      const pending = items.filter(c => c.status === 'pending').length
+      const resolved = items.filter(c => c.status === 'resolved').length
       return {
-        data,
-        total: data.length,
-        pending,
-        resolved
+        data: {
+          total: items.length,
+          pending,
+          resolved,
+          items
+        }
       }
     } catch (error) {
       // Return empty response on error
-      return { data: [], total: 0, pending: 0, resolved: 0 }
+      return {
+        data: {
+          total: 0,
+          pending: 0,
+          resolved: 0,
+          items: []
+        }
+      }
     }
   },
 
