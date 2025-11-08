@@ -133,7 +133,15 @@ export default function HomePage() {
                   <span>Initializing secure connection...</span>
                 </div>
                 <Progress value={progress} className="h-2" />
-                <div className="flex items-center justify-center space-x-2">
+                <div className="flex items-center justify-center space-x-4">
+                  <Button
+                    onClick={() => router.push('/whitepaper')}
+                    size="lg"
+                    variant="outline"
+                    className="px-8"
+                  >
+                    Download Whitepaper
+                  </Button>
                   <Button
                     onClick={() => router.push('/auth/login')}
                     size="lg"
